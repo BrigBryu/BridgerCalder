@@ -1,26 +1,29 @@
 package com.mygdx.game.entities;
 
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.Enums;
 import com.mygdx.game.util.HitBox;
 import com.mygdx.game.world.WallTile;
 
+
 import java.util.List;
 
+
 public class Player extends HitBox {
-    private enum Direction {
-        LEFT, RIGHT, IDLE, ATTACKING
-    }
 
     private Animation<TextureRegion> walkLeftAnimation;
     private Animation<TextureRegion> walkRightAnimation;
     private Animation<TextureRegion> attackLeftAnimation;
     private Animation<TextureRegion> attackRightAnimation;
+
 
     private TextureRegion idleFrame;
     private Texture walkLeftFrame1, walkLeftFrame2, walkLeftFrame3, walkLeftFrame4, walkLeftFrame5;
@@ -28,20 +31,29 @@ public class Player extends HitBox {
     private Texture attackLeftFrame1, attackLeftFrame2, attackLeftFrame3, attackLeftFrame4, attackLeftFrame5;
     private Texture attackRightFrame1, attackRightFrame2, attackRightFrame3, attackRightFrame4, attackRightFrame5;
 
+
     private float stateTime;
-    private float attackTime;
-    private boolean isAttacking;
-    /**
-     * Move speed in pixels per second
-     */
+    private Enums.Direction direction;
+    private Enums.PlayerState state;
+
+
     private float speed = 200;
-    private Direction direction;
+
+
+    // Attack HitBoxes
+    private HitBox attackHitBoxLeft;
+    private HitBox attackHitBoxRight;
+    private HitBox attackHitBoxUp;
+    private HitBox attackHitBoxDown;
+
 
     public Player(float x, float y) {
         super(x, y, Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
 
+
         // Load individual textures
         idleFrame = new TextureRegion(new Texture("playerPlaceHolder1.png"));
+
 
         walkRightFrame1 = new Texture("playerPlaceHolderWalkRight1.png");
         walkRightFrame2 = new Texture("playerPlaceHolderWalkRight2.png");
@@ -49,11 +61,13 @@ public class Player extends HitBox {
         walkRightFrame4 = new Texture("playerPlaceHolderWalkRight4.png");
         walkRightFrame5 = new Texture("playerPlaceHolderWalkRight5.png");
 
+
         walkLeftFrame1 = new Texture("playerPlaceHolderWalkLeft1.png");
         walkLeftFrame2 = new Texture("playerPlaceHolderWalkLeft2.png");
         walkLeftFrame3 = new Texture("playerPlaceHolderWalkLeft3.png");
         walkLeftFrame4 = new Texture("playerPlaceHolderWalkLeft4.png");
         walkLeftFrame5 = new Texture("playerPlaceHolderWalkLeft5.png");
+
 
         attackRightFrame1 = new Texture("playerPlaceHolderAttackRight1.png");
         attackRightFrame2 = new Texture("playerPlaceHolderAttackRight2.png");
@@ -61,11 +75,13 @@ public class Player extends HitBox {
         attackRightFrame4 = new Texture("playerPlaceHolderAttackRight4.png");
         attackRightFrame5 = new Texture("playerPlaceHolderAttackRight5.png");
 
+
         attackLeftFrame1 = new Texture("playerPlaceHolderAttackLeft1.png");
         attackLeftFrame2 = new Texture("playerPlaceHolderAttackLeft2.png");
         attackLeftFrame3 = new Texture("playerPlaceHolderAttackLeft3.png");
         attackLeftFrame4 = new Texture("playerPlaceHolderAttackLeft4.png");
         attackLeftFrame5 = new Texture("playerPlaceHolderAttackLeft5.png");
+
 
         // Create the walk animations
         walkLeftAnimation = new Animation<TextureRegion>(0.15f,
@@ -77,6 +93,7 @@ public class Player extends HitBox {
         );
         walkLeftAnimation.setPlayMode(Animation.PlayMode.LOOP);
 
+
         walkRightAnimation = new Animation<TextureRegion>(0.15f,
                 new TextureRegion(walkRightFrame1),
                 new TextureRegion(walkRightFrame2),
@@ -85,6 +102,7 @@ public class Player extends HitBox {
                 new TextureRegion(walkRightFrame5)
         );
         walkRightAnimation.setPlayMode(Animation.PlayMode.LOOP);
+
 
         // Create the attack animations
         attackLeftAnimation = new Animation<TextureRegion>(0.1f,
@@ -96,6 +114,7 @@ public class Player extends HitBox {
         );
         attackLeftAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
+
         attackRightAnimation = new Animation<TextureRegion>(0.1f,
                 new TextureRegion(attackRightFrame1),
                 new TextureRegion(attackRightFrame2),
@@ -105,101 +124,146 @@ public class Player extends HitBox {
         );
         attackRightAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
+
         stateTime = 0f;
-        direction = Direction.IDLE;
-        isAttacking = false;
-        attackTime = 0f;
+        direction = Enums.Direction.RIGHT;
+        state = Enums.PlayerState.IDLE;
+
+
+        // Initialize attack HitBoxes
+        attackHitBoxLeft = new HitBox(x - Constants.TILE_SIZE, y, Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
+        attackHitBoxRight = new HitBox(x + Constants.TILE_SIZE, y, Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
+        attackHitBoxUp = new HitBox(x, y + Constants.TILE_SIZE * 2, Constants.TILE_SIZE, Constants.TILE_SIZE);
+        attackHitBoxDown = new HitBox(x, y - Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
     }
 
-    public void update(float delta, List<WallTile> wallTiles) {
+
+    public void update(float delta, List<WallTile> wallTiles, List<Enemy> enemies) {
+        float oldX = x, oldY = y; // Store old position to revert if collision occurs
         boolean isMoving = false;
 
-        float oldX = x, oldY = y; // Store old position to revert if collision occurs
 
-        float curSpeed = speed;
-        if(isAttacking){
-            curSpeed = speed/2;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            y += curSpeed * delta;
-            direction = Direction.RIGHT; // Use right animation for moving up
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            x -= curSpeed * delta;
-            direction = Direction.LEFT;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            y -= curSpeed * delta;
-            direction = Direction.LEFT; // Use left animation for moving down
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            x += curSpeed * delta;
-            direction = Direction.RIGHT;
-            isMoving = true;
-        }
+        if (state != Enums.PlayerState.ATTACKING) {
+            if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                y += speed * delta;
+                direction = Enums.Direction.UP;
+                isMoving = true;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                x -= speed * delta;
+                direction = Enums.Direction.LEFT;
+                isMoving = true;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                y -= speed * delta;
+                direction = Enums.Direction.DOWN;
+                isMoving = true;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                x += speed * delta;
+                direction = Enums.Direction.RIGHT;
+                isMoving = true;
+            }
 
-        // Check for attack input
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isAttacking) {
-            isAttacking = true;
-            attackTime = 0f;
-            direction = Direction.ATTACKING;
-            System.out.println("test");
-        }
 
-        // Update position only if not attacking
-            setPosition(x, y); // Update hitbox position
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+                Gdx.app.log("Player", "Attack initiated");
+                state = Enums.PlayerState.ATTACKING;
+                stateTime = 0f;
+                activateAttackHitBox(enemies);
+            }
 
-            // Check for collisions with wall tiles
+
+            setPosition(x, y);
+
+
             for (WallTile wallTile : wallTiles) {
                 if (this.overlaps(wallTile)) {
-                    setPosition(oldX, oldY); // Revert to old position if collision occurs
+                    setPosition(oldX, oldY);
                     break;
                 }
             }
 
+
             if (isMoving) {
+                state = Enums.PlayerState.WALKING;
                 stateTime += delta;
             } else {
-                stateTime = 0;
-                direction = Direction.IDLE;
-            }
-            attackTime += delta;
-            if (attackTime > attackLeftAnimation.getAnimationDuration()) {
-                isAttacking = false;
-                attackTime = 0f;
-            }
-
-    }
-
-    public void render(SpriteBatch batch) {
-        TextureRegion currentFrame;
-
-        if (isAttacking) {
-            if (direction != Direction.LEFT) {
-                currentFrame = attackLeftAnimation.getKeyFrame(attackTime, false);
-            } else {
-                currentFrame = attackRightAnimation.getKeyFrame(attackTime, false);
+                state = Enums.PlayerState.IDLE;
+                stateTime = 0f;
             }
         } else {
-            switch (direction) {
-                case LEFT:
-                    currentFrame = walkLeftAnimation.getKeyFrame(stateTime, true);
-                    break;
-                case RIGHT:
-                    currentFrame = walkRightAnimation.getKeyFrame(stateTime, true);
-                    break;
-                case IDLE:
-                default:
-                    currentFrame = idleFrame;
-                    break;
+            stateTime += delta;
+            Gdx.app.log("Player", "Attacking: " + stateTime + "/" + attackRightAnimation.getAnimationDuration());
+            if (stateTime > attackRightAnimation.getAnimationDuration()) {
+                Gdx.app.log("Player", "Attack finished");
+                state = Enums.PlayerState.IDLE;
+                stateTime = 0f;
             }
         }
-
-        batch.draw(currentFrame, x, y, width, height);
     }
+
+
+    private void activateAttackHitBox(List<Enemy> enemies) {
+        HitBox attackHitBox = null;
+        switch (direction) {
+            case LEFT:
+                attackHitBox = attackHitBoxLeft;
+                break;
+            case RIGHT:
+                attackHitBox = attackHitBoxRight;
+                break;
+            case UP:
+                attackHitBox = attackHitBoxUp;
+                break;
+            case DOWN:
+                attackHitBox = attackHitBoxDown;
+                break;
+        }
+
+
+        if (attackHitBox != null) {
+            for (Enemy enemy : enemies) {
+                if (attackHitBox.overlaps(enemy)) {
+                    doDamage(enemy);
+                }
+            }
+        }
+    }
+
+
+    private void doDamage(Enemy enemy) {
+        // Implement damage logic here TODO
+    }
+
+
+    public void render(SpriteBatch batch) {
+        TextureRegion currentFrame = null;
+
+
+        switch (state) {
+            case WALKING:
+                currentFrame = direction == Enums.Direction.LEFT ?
+                        walkLeftAnimation.getKeyFrame(stateTime, true) :
+                        walkRightAnimation.getKeyFrame(stateTime, true);
+                break;
+            case ATTACKING:
+                currentFrame = direction == Enums.Direction.LEFT ?
+                        attackLeftAnimation.getKeyFrame(stateTime, false) :
+                        attackRightAnimation.getKeyFrame(stateTime, false);
+                break;
+            case IDLE:
+            default:
+                currentFrame = idleFrame;
+                break;
+        }
+
+
+        if (currentFrame != null) {
+            batch.draw(currentFrame, x, y, width, height);
+        }
+    }
+
 
     public void dispose() {
         idleFrame.getTexture().dispose();
