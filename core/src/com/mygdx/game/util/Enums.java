@@ -6,6 +6,10 @@ public class Enums {
     }
 
     public enum PlayerState {
-        WALKING, ATTACKING, IDLE
+        WALKING, IDLE
+    }
+
+    public enum AttackState {
+        NOT_ATTACKING, ATTACKING
     }
 }

@@ -1,0 +1,20 @@
+How to update git hub main
+git status : Check which files have been modified, added, or deleted
+git add . : Add all changes
+git commit -m "Describe changes" : Commit the staged changes
+git pull origin main : (Optional) Ensures local repository is up to date with the remote repository
+git push origin main : Push your local commits to the remote repository on GitHub
+
+Branching
+git checkout -b new-branch-name : Create a new branch and switch to it
+git branch : View All Branches
+git checkout new-branch-name : Goes to branch new-branch-name
+
+Merging a Branch into main
+git checkout main : switch to what you want to merge into
+git merge new-branch-name : Merges your branch with current (in this case would be main)
+git push origin main : After merging push changes to github
+
+Updating a Branch
+git checkout new-branch-name : Goes to branch new-branch-name
+git pull origin main : Merges the changes main branch into new-branch-name. If there are any conflicts, you will need to resolve them

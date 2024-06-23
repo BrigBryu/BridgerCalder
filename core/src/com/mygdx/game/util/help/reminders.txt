@@ -1,0 +1,4 @@
+Animation classes
+    Texture for loading the raw image data.
+    TextureRegion for representing specific frames or parts of the Texture.
+    Animation for managing a sequence of TextureRegion frames to create animations.

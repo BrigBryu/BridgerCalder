@@ -93,7 +93,7 @@ public class BasicEnemy extends Enemy {
                 break;
         }
 
-        System.out.println("Moving " + direction + ": (" + oldX + ", " + oldY + ") -> (" + x + ", " + y + ")");
+       // System.out.println("Moving " + direction + ": (" + oldX + ", " + oldY + ") -> (" + x + ", " + y + ")");
     }
 
 
