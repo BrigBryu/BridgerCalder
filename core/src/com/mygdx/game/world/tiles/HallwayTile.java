@@ -1,12 +1,12 @@
-package com.mygdx.game.world;
+package com.mygdx.game.world.tiles;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class WallTile extends Tile {
+public class HallwayTile extends Tile {
 
-    public WallTile(float x, float y, float width, float height, Texture texture) {
-        super(x, y, width, height, texture);
+    public HallwayTile(float x, float y, Texture texture) {
+        super(x, y, texture);
     }
 
     @Override

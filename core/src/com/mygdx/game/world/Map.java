@@ -3,7 +3,8 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.util.Constants;
-import com.mygdx.game.entities.Player;
+import com.mygdx.game.world.tiles.Tile;
+import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.ArrayList;
 import java.util.List;

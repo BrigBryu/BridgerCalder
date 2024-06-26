@@ -1,0 +1,12 @@
+Simple DungeonGenerator explanation
+generateDungeon(): Main method to generate the dungeon layout.
+generateRooms(): Creates multiple rooms with random positions and sizes.
+generateHallways(): Connects the rooms with hallways.
+generateSafeZones(): Adds safe zones at random positions.
+populateMap(): Adds all the generated tiles to the map.
+The Map class is used to render the map after generation
+
+
+Make room box
+Calculate the midpoint of each room
+Draw horizontal and vertical hallways from one room to the next

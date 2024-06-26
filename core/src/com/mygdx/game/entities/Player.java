@@ -10,7 +10,7 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Enums;
 import com.mygdx.game.util.HitBox;
-import com.mygdx.game.world.WallTile;
+import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.List;
 

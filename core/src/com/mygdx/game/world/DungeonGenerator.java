@@ -1,127 +1,104 @@
 package com.mygdx.game.world;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.MathUtils;
+import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Zone;
+import com.mygdx.game.world.tiles.HallwayTile;
+import com.mygdx.game.world.tiles.Tile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class DungeonGenerator {
     private List<Room> rooms;
-    private Texture floorTexture, wallTexture;
-    private Random rand = new Random();
-    private RandomizationController randController;
-    private Map map;  // The map object to hold the generated dungeon
-    private boolean[] visited;  // To track visited rooms
+    private Texture floorTexture, wallTexture, hallwayTexture, safeTexture;
+    private Random rand;
+    private Map map;
 
     public DungeonGenerator() {
         rooms = new ArrayList<>();
-        randController = new RandomizationController();
+        rand = new Random();
         floorTexture = new Texture("testFloor.png");
         wallTexture = new Texture("testWall.png");
-        map = new Map();  // Initialize the map
+        hallwayTexture = new Texture("testHallway.png");
+        safeTexture = new Texture("testSafe.png");
+        map = new Map();
     }
 
     public void generateDungeon(int width, int height) {
         initializeDungeon(width, height);
 
-        // Define zones for DFS and BFS (values need to be defined based on your map size)
-        Zone dfsZone = new Zone(0, 0, width / 2, height); // Example zone for DFS
-        Zone bfsZone = new Zone(width / 2, 0, width / 2, height); // Example zone for BFS
+        // Define zones
+        Zone mainZone = new Zone(0, 0, width, height);
 
-        // Generate rooms in each zone
-        generateRooms(dfsZone);
-        generateRooms(bfsZone);
+        // Generate rooms and hallways
+        generateRooms(mainZone);
+        generateHallways();
 
-        // Connect rooms within zones
-        generateDFSZone(dfsZone);
-        generateBFSZone(bfsZone);
-
-        // Optionally, ensure connectivity between zones
-        //connectZones(dfsZone, bfsZone);
+        // Generate safe zones
+        generateSafeZones(1 + rand.nextInt(3)); // 1-3 additional safe zones
 
         // Populate the map with the generated rooms and paths
         populateMap();
     }
 
     private void initializeDungeon(int width, int height) {
-        visited = new boolean[width * height]; // Assuming each cell in a grid could theoretically hold a room
-        // More initialization logic can be added here if necessary
+        // Initialization logic here
     }
 
     private void generateRooms(Zone zone) {
-        // Generate rooms within a given zone
-        for (int i = zone.startX; i < zone.startX + zone.width; i += 10) {
-            for (int j = zone.startY; j < zone.startY + zone.height; j += 10) {
-                int roomWidth = rand.nextInt(3) + 5; // Random width from 5 to 7
-                int roomHeight = rand.nextInt(3) + 5; // Random height from 5 to 7
-                Room room = new Room(i, j, roomWidth, roomHeight, floorTexture);
-                rooms.add(room);
-            }
+        // Generate rooms with floor and wall tiles within a given zone
+        for (int i = 0; i < 10; i++) {
+            int roomWidth = 5 + rand.nextInt(5);
+            int roomHeight = 5 + rand.nextInt(5);
+            int x = rand.nextInt(zone.width - roomWidth);
+            int y = rand.nextInt(zone.height - roomHeight);
+            Room room = new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+            rooms.add(room);
         }
     }
 
-    private void generateDFSZone(Zone zone) {
-        Room startRoom = pickStartingRoom(rooms);
-        connectRoomsDFS(startRoom);
-    }
-
-    private void generateBFSZone(Zone zone) {
-        Room startRoom = pickStartingRoom(rooms);
-        connectRoomsBFS(startRoom);
-    }
-
-    private Room pickStartingRoom(List<Room> rooms) {
-        return rooms.get(rand.nextInt(rooms.size()));
-    }
-
-    private void connectRoomsDFS(Room startRoom) {
-        Stack<Room> stack = new Stack<>();
-        stack.push(startRoom);
-        visited[rooms.indexOf(startRoom)] = true;
-
-        while (!stack.isEmpty()) {
-            Room currentRoom = stack.pop();
-            List<Room> neighbors = getUnvisitedNeighbors(currentRoom);
-
-            for (Room neighbor : neighbors) {
-                currentRoom.connect(neighbor);
-                visited[rooms.indexOf(neighbor)] = true;
-                stack.push(neighbor);
-            }
+    private void generateHallways() {
+        // Generate hallways between rooms
+        for (int i = 0; i < rooms.size() - 1; i++) {
+            Room roomA = rooms.get(i);
+            Room roomB = rooms.get(i + 1);
+            connectRooms(roomA, roomB);
         }
     }
 
-    private void connectRoomsBFS(Room startRoom) {
-        Queue<Room> queue = new LinkedList<>();
-        queue.add(startRoom);
-        visited[rooms.indexOf(startRoom)] = true;
-
-        while (!queue.isEmpty()) {
-            Room currentRoom = queue.poll();
-            List<Room> neighbors = getUnvisitedNeighbors(currentRoom);
-
-            for (Room neighbor : neighbors) {
-                currentRoom.connect(neighbor);
-                visited[rooms.indexOf(neighbor)] = true;
-                queue.add(neighbor);
-            }
+    private void generateSafeZones(int count) {
+        // Generate a specified number of safe zones
+        for (int i = 0; i < count; i++) {
+            int roomWidth = 5;
+            int roomHeight = 5;
+            int x = rand.nextInt(100);
+            int y = rand.nextInt(100);
+            Room safeZone = new Room(x, y, roomWidth, roomHeight, safeTexture, wallTexture);
+            rooms.add(safeZone);
         }
     }
 
-    public List<Room> getUnvisitedNeighbors(Room room) {
-        List<Room> neighbors = new ArrayList<>();
-        for (Room potentialNeighbor : rooms) {
-            if (!visited[rooms.indexOf(potentialNeighbor)] && isAdjacent(room, potentialNeighbor)) {
-                neighbors.add(potentialNeighbor);
+    private void connectRooms(Room roomA, Room roomB) {
+        // Connect two rooms with a hallway
+        int startX = MathUtils.floor(roomA.getX() + roomA.getWidth() / 2);
+        int startY = MathUtils.floor(roomA.getY() + roomA.getHeight() / 2);
+        int endX = MathUtils.floor(roomB.getX() + roomB.getWidth() / 2);
+        int endY = MathUtils.floor(roomB.getY() + roomB.getHeight() / 2);
+
+        if (startX != endX) {
+            for (int x = Math.min(startX, endX); x <= Math.max(startX, endX); x++) {
+                map.addTile(new HallwayTile(x * Constants.TILE_SIZE, startY * Constants.TILE_SIZE, hallwayTexture));
             }
         }
-        return neighbors;
-    }
 
-    private boolean isAdjacent(Room room, Room potentialNeighbor) {
-        // Simple adjacency check, could be improved based on actual room positions and sizes
-        return Math.abs(room.getX() - potentialNeighbor.getX()) < room.getWidth() + potentialNeighbor.getWidth() &&
-                Math.abs(room.getY() - potentialNeighbor.getY()) < room.getHeight() + potentialNeighbor.getHeight();
+        if (startY != endY) {
+            for (int y = Math.min(startY, endY); y <= Math.max(startY, endY); y++) {
+                map.addTile(new HallwayTile(endX * Constants.TILE_SIZE, y * Constants.TILE_SIZE, hallwayTexture));
+            }
+        }
     }
 
     private void populateMap() {
@@ -140,6 +117,8 @@ public class DungeonGenerator {
     public void dispose() {
         floorTexture.dispose();
         wallTexture.dispose();
+        hallwayTexture.dispose();
+        safeTexture.dispose();
         map.dispose();
     }
 }
