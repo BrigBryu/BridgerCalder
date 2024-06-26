@@ -1,0 +1,10 @@
+Explains skins:
+https://libgdx.com/wiki/graphics/2d/scene2d/skin
+
+Currently using:
+skin json
+https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests-android/assets/data/uiskin.json
+skin atlas
+https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests-android/assets/data/uiskin.atlas
+skin pic
+https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests-android/assets/data/uiskin.png

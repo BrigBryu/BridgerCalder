@@ -52,4 +52,12 @@ public class Map {
     public List<WallTile> getWallTiles() {
         return wallTiles;
     }
+
+    public void addTile(Tile tile) {
+        tiles.add(tile);
+    }
+
+    public void addWallTile(WallTile wallTile) {
+        wallTiles.add(wallTile);
+    }
 }

@@ -3,7 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.mygdx.game.screens.GameScreen;
+import com.mygdx.game.screens.MenuScreen;
 
 public class Boot extends Game {
     public static Boot INSTANCE;
@@ -20,10 +20,10 @@ public class Boot extends Game {
         this.heightScreen = Gdx.graphics.getHeight();
 
         // Set the viewport size here
-        this.orthographicCamera = new OrthographicCamera(1600 , 1200);
+        this.orthographicCamera = new OrthographicCamera(1600, 1200);
         this.orthographicCamera.setToOrtho(false);
 
-        setScreen(new GameScreen(this.orthographicCamera));
+        setScreen(new MenuScreen(this));
     }
 
     public int getWidthScreen() {
