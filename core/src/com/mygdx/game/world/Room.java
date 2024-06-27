@@ -28,6 +28,8 @@ public class Room {
     }
 
     private void initializeTiles() {
+        tiles.clear();
+
         // Create floor tiles
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -64,6 +66,16 @@ public class Room {
 
     public int getHeight() {
         return height;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+        initializeTiles();
+    }
+
+    public void setY(int y) {
+        this.y = y;
+        initializeTiles();
     }
 
     public void render(SpriteBatch batch) {

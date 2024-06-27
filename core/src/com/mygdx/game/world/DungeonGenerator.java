@@ -49,15 +49,71 @@ public class DungeonGenerator {
     }
 
     private void generateRooms(Zone zone) {
-        // Generate rooms with floor and wall tiles within a given zone
-        for (int i = 0; i < 10; i++) {
-            int roomWidth = 5 + rand.nextInt(5);
-            int roomHeight = 5 + rand.nextInt(5);
-            int x = rand.nextInt(zone.width - roomWidth);
-            int y = rand.nextInt(zone.height - roomHeight);
-            Room room = new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
-            rooms.add(room);
+        // Start with the first room
+        Room startRoom = generateRoom(rand.nextInt(zone.width), rand.nextInt(zone.height));
+        rooms.add(startRoom);
+
+        // Generate subsequent rooms
+        for (int i = 1; i < 10; i++) {
+            Room newRoom = null;
+            boolean roomPlaced = false;
+
+            // Attempt to place the new room
+            while (!roomPlaced) {
+                Room baseRoom = rooms.get(rand.nextInt(rooms.size()));
+                int gapX = Constants.MIN_ROOM_GAP + rand.nextInt(Constants.MAX_ROOM_GAP - Constants.MIN_ROOM_GAP + 1);
+                int gapY = Constants.MIN_ROOM_GAP + rand.nextInt(Constants.MAX_ROOM_GAP - Constants.MIN_ROOM_GAP + 1);
+
+                // Determine new room position
+                int newX = baseRoom.getX() + baseRoom.getWidth() + gapX;
+                int newY = baseRoom.getY() + baseRoom.getHeight() + gapY;
+
+                // Try placing the room at different positions around the base room
+                for (int j = 0; j < 4; j++) {
+                    if (j == 1) {
+                        newX = baseRoom.getX() - gapX - rand.nextInt(5);
+                    } else if (j == 2) {
+                        newY = baseRoom.getY() - gapY - rand.nextInt(5);
+                    } else if (j == 3) {
+                        newX = baseRoom.getX() + gapX + rand.nextInt(5);
+                    }
+
+                    newRoom = generateRoom(newX, newY);
+
+                    // Check if the room intersects with any existing rooms
+                    if (!intersectsAnyRoom(newRoom)) {
+                        roomPlaced = true;
+                        break;
+                    }
+                }
+            }
+
+            if (newRoom != null) {
+                rooms.add(newRoom);
+            }
         }
+    }
+
+    private Room generateRoom(int x, int y) {
+        int roomWidth = 5 + rand.nextInt(5);
+        int roomHeight = 5 + rand.nextInt(5);
+        return new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+    }
+
+    private boolean intersectsAnyRoom(Room newRoom) {
+        for (Room room : rooms) {
+            if (intersects(room, newRoom)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean intersects(Room roomA, Room roomB) {
+        return roomA.getX() < roomB.getX() + roomB.getWidth() &&
+                roomA.getX() + roomA.getWidth() > roomB.getX() &&
+                roomA.getY() < roomB.getY() + roomB.getHeight() &&
+                roomA.getY() + roomA.getHeight() > roomB.getY();
     }
 
     private void generateHallways() {
@@ -66,18 +122,6 @@ public class DungeonGenerator {
             Room roomA = rooms.get(i);
             Room roomB = rooms.get(i + 1);
             connectRooms(roomA, roomB);
-        }
-    }
-
-    private void generateSafeZones(int count) {
-        // Generate a specified number of safe zones
-        for (int i = 0; i < count; i++) {
-            int roomWidth = 5;
-            int roomHeight = 5;
-            int x = rand.nextInt(100);
-            int y = rand.nextInt(100);
-            Room safeZone = new Room(x, y, roomWidth, roomHeight, safeTexture, wallTexture);
-            rooms.add(safeZone);
         }
     }
 
@@ -101,8 +145,20 @@ public class DungeonGenerator {
         }
     }
 
+    private void generateSafeZones(int count) {
+        // Generate a specified number of safe zones
+        for (int i = 0; i < count; i++) {
+            int roomWidth = 5;
+            int roomHeight = 5;
+            int x = rand.nextInt(100);
+            int y = rand.nextInt(100);
+            Room safeZone = new Room(x, y, roomWidth, roomHeight, safeTexture, wallTexture);
+            rooms.add(safeZone);
+        }
+    }
+
     private void populateMap() {
-        // Add all the tiles from the rooms to the map
+        // Add all the tiles from the rooms and hallways to the map
         for (Room room : rooms) {
             for (Tile tile : room.getTiles()) {
                 map.addTile(tile);
