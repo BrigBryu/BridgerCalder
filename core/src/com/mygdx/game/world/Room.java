@@ -83,4 +83,12 @@ public class Room {
             tile.render(batch);
         }
     }
+
+
+    public boolean intersects(Tile tile) {
+        return this.getX() < tile.getX() + tile.getWidth() &&
+                this.getX() + this.getWidth() > tile.getX() &&
+                this.getY() < tile.getY() + tile.getHeight() &&
+                this.getY() + this.getHeight() > tile.getY();
+    }
 }

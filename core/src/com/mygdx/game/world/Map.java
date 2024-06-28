@@ -9,6 +9,8 @@ import com.mygdx.game.world.tiles.WallTile;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mygdx.game.util.Constants.wallIntersectionsOn;
+
 public class Map {
     private List<Tile> tiles;
     private List<WallTile> wallTiles;
@@ -55,10 +57,47 @@ public class Map {
     }
 
     public void addTile(Tile tile) {
-        tiles.add(tile);
+        if(tile instanceof WallTile && wallIntersectionsOn){
+            addWallTile((WallTile) tile);
+        } else {
+            tiles.add(tile);
+        }
     }
 
     public void addWallTile(WallTile wallTile) {
         wallTiles.add(wallTile);
+    }
+
+    public boolean intersectsWithRoom(Room room) {
+        for (Tile tile : tiles) {
+            if (room.intersects(tile)) {
+                return true;
+            }
+        }
+        for (WallTile wallTile : wallTiles) {
+            if (room.intersects(wallTile)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean intersectsWithRoom(Room room, List<Tile> ignoreTiles) {
+        for (Tile tile : tiles) {
+            if (ignoreTiles != null && ignoreTiles.contains(tile)) {
+                continue;
+            }
+            if (room.intersects(tile)) {
+                return true;
+            }
+        }
+        for (WallTile wallTile : wallTiles) {
+            if (ignoreTiles != null && ignoreTiles.contains(wallTile)) {
+                continue;
+            }
+            if (room.intersects(wallTile)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

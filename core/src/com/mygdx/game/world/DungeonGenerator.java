@@ -13,9 +13,16 @@ import java.util.Random;
 
 public class DungeonGenerator {
     private List<Room> rooms;
-    private Texture floorTexture, wallTexture, hallwayTexture, safeTexture;
+    private Texture floorTexture, wallTexture, hallwayTexture, entryTexture;
     private Random rand;
     private Map map;
+    private int startX;
+    private int startY;
+    private int minRoomWidth = 10;
+    private int minRoomHeight = 10;
+    private int minRoomDistApart = 2;
+
+
 
     public DungeonGenerator() {
         rooms = new ArrayList<>();
@@ -23,7 +30,7 @@ public class DungeonGenerator {
         floorTexture = new Texture("testFloor.png");
         wallTexture = new Texture("testWall.png");
         hallwayTexture = new Texture("testHallway.png");
-        safeTexture = new Texture("testSafe.png");
+        entryTexture = new Texture("testSafe.png");
         map = new Map();
     }
 
@@ -37,21 +44,21 @@ public class DungeonGenerator {
         generateRooms(mainZone);
         generateHallways();
 
-        // Generate safe zones
-        generateSafeZones(1 + rand.nextInt(3)); // 1-3 additional safe zones
-
         // Populate the map with the generated rooms and paths
         populateMap();
     }
 
     private void initializeDungeon(int width, int height) {
-        // Initialization logic here
+        // Initialization logic cant think of any
     }
 
     private void generateRooms(Zone zone) {
         // Start with the first room
-        Room startRoom = generateRoom(rand.nextInt(zone.width), rand.nextInt(zone.height));
+        Room startRoom = new StartRoom(0, 0, 7, 7, floorTexture, wallTexture, entryTexture);
         rooms.add(startRoom);
+
+        startX = ((StartRoom)startRoom).getEntryX();
+        startY = ((StartRoom)startRoom).getEntryY();
 
         // Generate subsequent rooms
         for (int i = 1; i < 10; i++) {
@@ -95,8 +102,8 @@ public class DungeonGenerator {
     }
 
     private Room generateRoom(int x, int y) {
-        int roomWidth = 5 + rand.nextInt(5);
-        int roomHeight = 5 + rand.nextInt(5);
+        int roomWidth = minRoomWidth + rand.nextInt(minRoomWidth);
+        int roomHeight = minRoomHeight + rand.nextInt(minRoomHeight);
         return new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
     }
 
@@ -132,29 +139,59 @@ public class DungeonGenerator {
         int endX = MathUtils.floor(roomB.getX() + roomB.getWidth() / 2);
         int endY = MathUtils.floor(roomB.getY() + roomB.getHeight() / 2);
 
+//        if((endX - startX > minRoomWidth && endY - startY > minRoomWidth) || (endY - startY > minRoomWidth && endX - startX > minRoomWidth)){
+//            System.out.println("Making hall not crazy");
+//            for(int i = 0; i < 5; i++){
+//                int roomWidth = minRoomWidth + rand.nextInt(endX - startX - (minRoomWidth + minRoomDistApart));
+//                int roomHeight = minRoomWidth + rand.nextInt(endX - startX - (minRoomHeight + minRoomDistApart));
+//                Room newRoom = new Room(endX - startX + ((i - 2) * Constants.TILE_SIZE), endY - startY + (i - 2) * Constants.TILE_SIZE, roomWidth, roomHeight, floorTexture, wallTexture);
+//                // Check if the room intersects with any existing tiles
+//                if (!map.intersectsWithRoom(newRoom)) {
+//                    newRoom = null;
+//                }
+//                if (newRoom != null) {
+//                   // rooms.add(newRoom);
+//                    System.out.println("Success making hall not crazy");
+//                }
+//                }
+//
+//        }
+        List<Tile> ignoreTiles = new ArrayList<>();
         if (startX != endX) {
             for (int x = Math.min(startX, endX); x <= Math.max(startX, endX); x++) {
-                map.addTile(new HallwayTile(x * Constants.TILE_SIZE, startY * Constants.TILE_SIZE, hallwayTexture));
+                Tile hall = new HallwayTile(x * Constants.TILE_SIZE, startY * Constants.TILE_SIZE, hallwayTexture);
+                map.addTile(hall);
+                ignoreTiles.add(hall);
             }
         }
 
         if (startY != endY) {
             for (int y = Math.min(startY, endY); y <= Math.max(startY, endY); y++) {
-                map.addTile(new HallwayTile(endX * Constants.TILE_SIZE, y * Constants.TILE_SIZE, hallwayTexture));
+                Tile hall = new HallwayTile(endX * Constants.TILE_SIZE, y * Constants.TILE_SIZE, hallwayTexture);
+                map.addTile(hall);
+                ignoreTiles.add(hall);
             }
         }
-    }
 
-    private void generateSafeZones(int count) {
-        // Generate a specified number of safe zones
-        for (int i = 0; i < count; i++) {
-            int roomWidth = 5;
-            int roomHeight = 5;
-            int x = rand.nextInt(100);
-            int y = rand.nextInt(100);
-            Room safeZone = new Room(x, y, roomWidth, roomHeight, safeTexture, wallTexture);
-            rooms.add(safeZone);
+        if ((endX - startX > minRoomWidth && endY - startY > minRoomWidth) || (endY - startY > minRoomWidth && endX - startX > minRoomWidth)) {
+            System.out.println("Making hall not crazy");
+            for (int i = 0; i < 5; i++) {
+                int roomWidth = minRoomWidth + rand.nextInt(endX - startX - (minRoomDistApart));
+                int roomHeight = minRoomWidth + rand.nextInt(endX - startX - (minRoomDistApart));
+                Room newRoom = new Room(endX - startX + ((i - 2) * Constants.TILE_SIZE), endY - startY + (i - 2) * Constants.TILE_SIZE, roomWidth, roomHeight, floorTexture, wallTexture);
+
+                // Check if the room intersects with any existing tiles
+                if (!map.intersectsWithRoom(newRoom, ignoreTiles)) {
+                    newRoom = null;
+                }
+                if (newRoom != null) {
+                    // Add the tiles of the new room to the ignore list
+                    rooms.add(newRoom);
+                    System.out.println("Success making hall not crazy");
+                }
+            }
         }
+
     }
 
     private void populateMap() {
@@ -170,11 +207,19 @@ public class DungeonGenerator {
         return map;
     }
 
+    public int getStartX(){
+        return startX;
+    }
+
+    public int getStartY(){
+        return startY;
+    }
+
     public void dispose() {
         floorTexture.dispose();
         wallTexture.dispose();
         hallwayTexture.dispose();
-        safeTexture.dispose();
+        entryTexture.dispose();
         map.dispose();
     }
 }
