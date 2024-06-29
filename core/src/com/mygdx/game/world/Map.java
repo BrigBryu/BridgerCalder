@@ -64,6 +64,30 @@ public class Map {
         }
     }
 
+    public void addWallTileNondestructive(WallTile wallTile) {
+        boolean intersects = false;
+        for (WallTile existingWallTile : wallTiles) {
+            if (existingWallTile.getX() == wallTile.getX() && existingWallTile.getY() == wallTile.getY()) {
+                intersects = true;
+                break;
+            }
+        }
+        for (Tile existingTiles : tiles) {
+            if (existingTiles.getX() == wallTile.getX() && existingTiles.getY() == wallTile.getY()) {
+                intersects = true;
+                break;
+            }
+        }
+        if (!intersects) {
+            if (wallIntersectionsOn) {
+                wallTiles.add(wallTile);
+            } else {
+                tiles.add(wallTile);
+            }
+        }
+    }
+
+
     public void addWallTile(WallTile wallTile) {
         wallTiles.add(wallTile);
     }
@@ -80,6 +104,65 @@ public class Map {
             }
         }
         return false;
+    }
+
+    public void addTileDestructiveRegular(Tile tile) {
+        boolean replaced = false;
+        // overlaps regular tile
+        for (int i = 0; i < tiles.size(); i++) {
+            Tile existingTile = tiles.get(i);
+            if (existingTile.getX() == tile.getX() && existingTile.getY() == tile.getY()) {
+                tiles.set(i, tile); // Replace the existing tile
+                replaced = true;
+                break;
+            }
+        }
+
+        // no existing tile was replaced, add
+        if (!replaced) {
+            if (tile instanceof WallTile) {
+                wallTiles.add((WallTile) tile);
+            } else {
+                tiles.add(tile);
+            }
+        }
+    }
+
+    public void addTileDestructiveWalls(Tile tile) {
+
+        boolean replaced = false;
+
+        // overlaps wall tile
+        for (int i = 0; i < wallTiles.size(); i++) {
+            WallTile existingWallTile = wallTiles.get(i);
+            if (existingWallTile.getX() == tile.getX() && existingWallTile.getY() == tile.getY()) {
+                wallTiles.set(i, (WallTile) tile); // Replace the existing wall tile
+                replaced = true;
+                break;
+            }
+        }
+
+        // no existing tile was replaced, add
+        if (!replaced) {
+            if (tile instanceof WallTile) {
+                wallTiles.add((WallTile) tile);
+            } else {
+                tiles.add(tile);
+            }
+        }
+    }
+
+    public void addTileDestructiveBoth(Tile tile) {
+        // Iterates over every element (existingTile) in collection and removes it if overlap with tile
+        tiles.removeIf(existingTile -> existingTile.getX() == tile.getX() && existingTile.getY() == tile.getY());
+        wallTiles.removeIf(existingWallTile -> existingWallTile.getX() == tile.getX() && existingWallTile.getY() == tile.getY());
+
+        // Add the new tile to the appropriate list
+        if (tile instanceof WallTile) {
+            wallTiles.add((WallTile) tile);
+        } else {
+            tiles.add(tile);
+        }
     }
     public boolean intersectsWithRoom(Room room, List<Tile> ignoreTiles) {
         for (Tile tile : tiles) {

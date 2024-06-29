@@ -40,7 +40,7 @@ public class Player extends HitBox {
     private Enums.PlayerState movementState;
     private Enums.AttackState attackState;
 
-    private float speed = 200;
+    private float speed = 200 * 5;
 
     // Attack HitBoxes
     private HitBox attackHitBoxLeft;
@@ -49,7 +49,7 @@ public class Player extends HitBox {
     private HitBox attackHitBoxDown;
 
     public Player(float x, float y) {
-        super(x, y, Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
+        super(x, y, Constants.TILE_SIZE * 0.8f, Constants.TILE_SIZE * 1.7f);
 
         // Load individual textures
         idleFrame = new TextureRegion(new Texture("playerPlaceHolder1.png"));
