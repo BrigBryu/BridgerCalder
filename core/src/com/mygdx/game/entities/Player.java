@@ -49,7 +49,8 @@ public class Player extends HitBox {
     private HitBox attackHitBoxDown;
 
     public Player(float x, float y) {
-        super(x, y, Constants.TILE_SIZE * 0.8f, Constants.TILE_SIZE * 1.7f);
+        //super((float) (x + (Constants.TILE_SIZE * 0.2)), (float) (y + (Constants.TILE_SIZE * 0.2)), Constants.TILE_SIZE * 0.5f, Constants.TILE_SIZE * .7f);
+        super((float) (x),(y), Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
 
         // Load individual textures
         idleFrame = new TextureRegion(new Texture("playerPlaceHolder1.png"));
