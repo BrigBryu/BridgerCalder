@@ -3,6 +3,7 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.util.Constants;
+import com.mygdx.game.world.tiles.FloorTile;
 import com.mygdx.game.world.tiles.HallwayTile;
 import com.mygdx.game.world.tiles.Tile;
 import com.mygdx.game.world.tiles.WallTile;
@@ -10,11 +11,14 @@ import com.mygdx.game.world.tiles.WallTile;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.badlogic.gdx.math.MathUtils.random;
 import static com.mygdx.game.util.Constants.wallIntersectionsOn;
 
 public class Map {
     private List<Tile> tiles;
     private List<WallTile> wallTiles;
+    private Texture floorTexture;
+    private Texture wallTexture;
 
     public Map() {
         tiles = new ArrayList<>();
@@ -23,8 +27,8 @@ public class Map {
 
     public void initialize() {
         // simple grid of tiles
-        Texture floorTexture = new Texture("testFloor.png");
-        Texture wallTexture = new Texture("testWall.png");
+        floorTexture = new Texture("testFloor.png");
+         wallTexture = new Texture("testWall.png");
 
         for (int y = 0; y < 20; y++) {
             for (int x = 0; x < 25; x++) {
@@ -194,4 +198,33 @@ public class Map {
         }
         return false;
     }
+//
+//    public void cleanUpIsolatedWalls() {
+//        for (int i = 0; i < wallTiles.size(); i++) {
+//            WallTile wallTile = wallTiles.get(i);
+//            int wallCount = countAdjacentWalls(wallTile);
+//
+//            if (wallCount == 0 || wallCount == 2 || (wallCount == 3 && random.nextDouble() < 0.5)) {
+//                wallTiles.remove(i);
+//                tiles.add(new FloorTile(wallTile.getX(), wallTile.getY(), floorTexture));
+//                i--;
+//            }
+//        }
+//    }
+
+    private int countAdjacentWalls(WallTile wallTile) {
+        int count = 0;
+        int x = (int) wallTile.getX();
+        int y = (int) wallTile.getY();
+
+        for (WallTile wt : wallTiles) {
+            if (Math.abs(wt.getX() - x) <= Constants.TILE_SIZE && Math.abs(wt.getY() - y) <= Constants.TILE_SIZE) {
+                if (wt != wallTile) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
 }

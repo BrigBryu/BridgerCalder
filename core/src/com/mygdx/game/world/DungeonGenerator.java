@@ -52,6 +52,8 @@ public class DungeonGenerator {
 
         // Populate the map again with hallways to ensure they can override room tiles if necessary
         populateMapWithHallways();
+
+        //map.cleanUpIsolatedWalls();
     }
 
     private void initializeDungeon(int width, int height) {
@@ -110,7 +112,9 @@ public class DungeonGenerator {
     private Room generateRoom(int x, int y) {
         int roomWidth = minRoomWidth + rand.nextInt(minRoomWidth);
         int roomHeight = minRoomHeight + rand.nextInt(minRoomHeight);
-        return new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+
+                return new NaturalRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+
     }
 
     private boolean intersectsAnyRoom(Room newRoom) {

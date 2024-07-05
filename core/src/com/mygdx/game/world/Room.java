@@ -13,8 +13,8 @@ import java.util.List;
 public class Room {
     private int x, y, width, height;
     private List<Tile> tiles;
-    private Texture floorTexture;
-    private Texture wallTexture;
+    protected Texture floorTexture;
+    protected Texture wallTexture;
 
     public Room(int x, int y, int width, int height, Texture floorTexture, Texture wallTexture) {
         this.x = x;
@@ -38,6 +38,11 @@ public class Room {
         }
 
         // Create wall tiles around the edges
+        surroundWithWalls();
+    }
+
+    protected void surroundWithWalls(){
+
         for (int i = 0; i < width; i++) {
             tiles.add(new WallTile((x + i) * Constants.TILE_SIZE, y * Constants.TILE_SIZE, wallTexture));
             tiles.add(new WallTile((x + i) * Constants.TILE_SIZE, (y + height - 1) * Constants.TILE_SIZE, wallTexture));
