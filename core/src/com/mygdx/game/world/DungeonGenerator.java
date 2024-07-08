@@ -1,9 +1,9 @@
 package com.mygdx.game.world;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Zone;
+import com.mygdx.game.world.rooms.*;
 import com.mygdx.game.world.tiles.HallwayTile;
 import com.mygdx.game.world.tiles.Tile;
 import com.mygdx.game.world.tiles.WallTile;
@@ -112,8 +112,23 @@ public class DungeonGenerator {
     private Room generateRoom(int x, int y) {
         int roomWidth = minRoomWidth + rand.nextInt(minRoomWidth);
         int roomHeight = minRoomHeight + rand.nextInt(minRoomHeight);
+        int roomType = rand.nextInt(5);
+        if(roomType == 1){
+            return new ClusteredRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
-                return new NaturalRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+        } else if (roomType == 2) {
+            return new MazeRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+
+        } else if (roomType == 3) {
+            return new NaturalRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+
+        } else if (roomType == 4) {
+            return new CircularRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+
+        } else {
+            System.out.println("problem");
+        }
+        return new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
     }
 

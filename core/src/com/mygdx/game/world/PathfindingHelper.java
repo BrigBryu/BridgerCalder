@@ -1,5 +1,7 @@
 package com.mygdx.game.world;
 
+import com.mygdx.game.world.rooms.Room;
+
 import java.util.List;
 
 /**

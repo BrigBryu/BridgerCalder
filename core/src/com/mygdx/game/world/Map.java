@@ -3,7 +3,7 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.util.Constants;
-import com.mygdx.game.world.tiles.FloorTile;
+import com.mygdx.game.world.rooms.Room;
 import com.mygdx.game.world.tiles.HallwayTile;
 import com.mygdx.game.world.tiles.Tile;
 import com.mygdx.game.world.tiles.WallTile;
@@ -15,6 +15,7 @@ import static com.badlogic.gdx.math.MathUtils.random;
 import static com.mygdx.game.util.Constants.wallIntersectionsOn;
 
 public class Map {
+
     private List<Tile> tiles;
     private List<WallTile> wallTiles;
     private Texture floorTexture;
@@ -227,4 +228,18 @@ public class Map {
         return count;
     }
 
+    public Tile[][] to2DArray() {
+        Tile[][] tileArray = new Tile[20][25];
+        for (Tile tile : tiles) {
+            int x = (int) (tile.getX() / Constants.TILE_SIZE);
+            int y = (int) (tile.getY() / Constants.TILE_SIZE);
+            tileArray[y][x] = tile;
+        }
+        for (WallTile wallTile : wallTiles) {
+            int x = (int) (wallTile.getX() / Constants.TILE_SIZE);
+            int y = (int) (wallTile.getY() / Constants.TILE_SIZE);
+            tileArray[y][x] = wallTile;
+        }
+        return tileArray;
+    }
 }

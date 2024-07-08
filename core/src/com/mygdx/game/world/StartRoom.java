@@ -2,8 +2,8 @@ package com.mygdx.game.world;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.util.Constants;
+import com.mygdx.game.world.rooms.Room;
 import com.mygdx.game.world.tiles.EntryTile;
-import com.mygdx.game.world.tiles.Tile;
 
 public class StartRoom extends Room {
     private int entryX, entryY;

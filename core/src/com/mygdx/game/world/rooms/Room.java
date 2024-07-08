@@ -1,4 +1,4 @@
-package com.mygdx.game.world;
+package com.mygdx.game.world.rooms;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class Room {
     private int x, y, width, height;
-    private List<Tile> tiles;
+    protected List<Tile> tiles;
     protected Texture floorTexture;
     protected Texture wallTexture;
 

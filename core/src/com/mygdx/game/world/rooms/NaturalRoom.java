@@ -1,4 +1,4 @@
-package com.mygdx.game.world;
+package com.mygdx.game.world.rooms;
 
 
 import com.badlogic.gdx.graphics.Texture;
@@ -142,7 +142,7 @@ public class NaturalRoom extends Room {
         }
     }
 
-    protected void initializeTiles() {
+    private void initializeTiles() {
         List<Tile> tiles = getTiles();
         tiles.clear();
 
