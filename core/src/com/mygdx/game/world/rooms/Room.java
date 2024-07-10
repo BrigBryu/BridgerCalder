@@ -11,7 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Room {
-    private int x, y, width, height;
+    /**
+     * Not in pixels but in tiles
+     */
+    private int x, y;
+    private int  width, height;
     protected List<Tile> tiles;
     protected Texture floorTexture;
     protected Texture wallTexture;
@@ -95,5 +99,9 @@ public class Room {
                 this.getX() + this.getWidth() > tile.getX() &&
                 this.getY() < tile.getY() + tile.getHeight() &&
                 this.getY() + this.getHeight() > tile.getY();
+    }
+
+    public boolean contains(int px, int py) {
+        return (px/ Constants.TILE_SIZE) >= x && (px/ Constants.TILE_SIZE) < x + width && (py/ Constants.TILE_SIZE) >= y && (py/ Constants.TILE_SIZE) < y + height;
     }
 }

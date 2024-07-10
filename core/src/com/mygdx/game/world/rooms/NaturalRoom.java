@@ -32,7 +32,7 @@ public class NaturalRoom extends Room {
 
 
     private void generateRoom() {
-        initializeMap(0.45); // Initial wall probability
+        initializeMap(0.5); // Initial wall probability
         for (int i = 0; i < 5; i++) { // Number of simulation steps
             simulateStep();
         }
@@ -53,16 +53,12 @@ public class NaturalRoom extends Room {
         for (int i = 1; i < getWidth() - 1; i++) {
             for (int j = 1; j < getHeight() - 1; j++) {
                 int walls = countWalls(i, j);
-                if (random.nextDouble() < 0.95) {
                     // Attempt to push wall tiles to the corners with 70% chance
                     if (map[i][j] == WALL) {
                         pushToCorner(newMap, i, j);
                     } else {
                         newMap[i][j] = (walls > 4 || walls == 0) ? WALL : FLOOR;
                     }
-                } else {
-                    newMap[i][j] = (walls > 4 || walls == 0) ? WALL : FLOOR;
-                }
             }
         }
         map = newMap;

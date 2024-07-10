@@ -112,21 +112,19 @@ public class DungeonGenerator {
     private Room generateRoom(int x, int y) {
         int roomWidth = minRoomWidth + rand.nextInt(minRoomWidth);
         int roomHeight = minRoomHeight + rand.nextInt(minRoomHeight);
-        int roomType = rand.nextInt(5);
-        if(roomType == 1){
+        int roomType = rand.nextInt(4);
+        if(roomType == 0){
             return new ClusteredRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
-        } else if (roomType == 2) {
+        } else if (roomType == 1) {
             return new MazeRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
-        } else if (roomType == 3) {
+        } else if (roomType == 2) {
             return new NaturalRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
-        } else if (roomType == 4) {
+        } else if (roomType == 3) {
             return new CircularRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
-        } else {
-            System.out.println("problem");
         }
         return new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
@@ -291,6 +289,10 @@ public class DungeonGenerator {
         hallwayTexture.dispose();
         entryTexture.dispose();
         map.dispose();
+    }
+
+    public List<Room> getRooms() {
+        return  rooms;
     }
 }
 

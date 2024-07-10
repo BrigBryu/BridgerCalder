@@ -11,6 +11,7 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.world.DungeonGenerator;
 import com.mygdx.game.world.MapRenderer;
+import com.mygdx.game.world.rooms.Room;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,8 +72,13 @@ public class DungeonScreen implements Screen {
 
     private void update(float delta) {
         checkUserInput(delta);
+        updatePlayer(delta);
         updateEnemies(delta);
         updateCamera();
+    }
+
+    private void updatePlayer(float delta) {
+        updatePlayerSpeed();
     }
 
     private void checkUserInput(float delta) {
@@ -116,4 +122,22 @@ public class DungeonScreen implements Screen {
             enemy.dispose();
         }
     }
+
+    public boolean isPlayerInRoom() {
+        int playerX = (int) player.getX();
+        int playerY = (int) player.getY();
+        return mapRenderer.getMap().isInRoom(playerX, playerY, dungeonGenerator.getRooms());
+    }
+
+    public void updatePlayerSpeed() {
+        if (isPlayerInRoom()) {
+            System.out.println("in room");
+            player.resetSpeed(); // Reset to original speed if in a room
+        } else {
+            player.setOutOfRoomSpeed(); // Double the speed if not in a room
+            System.out.println("not in room");
+
+        }
+    }
+
 }

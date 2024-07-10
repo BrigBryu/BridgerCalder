@@ -21,6 +21,7 @@ public class MazeRoom extends Room {
         super(x, y, width, height, floorTexture, wallTexture);
         generateMaze();
         initializeTiles();
+        surroundWithWalls();
     }
 
     private void generateMaze() {

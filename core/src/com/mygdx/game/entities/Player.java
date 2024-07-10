@@ -40,7 +40,10 @@ public class Player extends HitBox {
     private Enums.PlayerState movementState;
     private Enums.AttackState attackState;
 
-    private float speed = 200 * 5;
+    private float speed = 200;
+    private float speedOutOfHall = (float) (speed * 2);
+    private float speedBase = 200 ;
+
 
     // Attack HitBoxes
     private HitBox attackHitBoxLeft;
@@ -275,6 +278,22 @@ public class Player extends HitBox {
         } else {
             stateTime += delta;
         }
+    }
+
+    public int getSpeed() {
+        return (int) speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    public void setOutOfRoomSpeed() {
+        this.speed = speedOutOfHall;
+    }
+
+    public void resetSpeed() {
+        this.speed = speedBase;
     }
 
     private void activateAttackHitBox(List<Enemy> enemies) {

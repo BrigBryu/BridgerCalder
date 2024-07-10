@@ -242,4 +242,14 @@ public class Map {
         }
         return tileArray;
     }
+
+    public boolean isInRoom(int x, int y, List<Room> rooms) {
+        for (Room room : rooms) {
+            if (room.contains(x, y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
