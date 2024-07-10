@@ -85,7 +85,7 @@ public class GameScreen implements Screen {
     }
 
     private void updateCamera() {
-        camera.position.set(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2, 0);
+        camera.position.set(player.getHitbox().getX() + player.getHitbox().getWidth() / 2, player.getHitbox().getY() + player.getHitbox().getHeight() / 2, 0);
         camera.update();
     }
 

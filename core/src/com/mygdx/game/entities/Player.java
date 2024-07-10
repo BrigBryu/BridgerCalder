@@ -14,7 +14,7 @@ import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.List;
 
-public class Player extends HitBox {
+public class Player {
 
     private Animation<TextureRegion> walkLeftAnimation;
     private Animation<TextureRegion> walkRightAnimation;
@@ -45,6 +45,10 @@ public class Player extends HitBox {
     private float speedBase = 200 ;
 
 
+    private HitBox hitbox;
+    private float playerBodyTextureWidth = Constants.TILE_SIZE;
+    private float playerBodyTextureHeight = Constants.TILE_SIZE * 2;
+
     // Attack HitBoxes
     private HitBox attackHitBoxLeft;
     private HitBox attackHitBoxRight;
@@ -53,7 +57,7 @@ public class Player extends HitBox {
 
     public Player(float x, float y) {
         //super((float) (x + (Constants.TILE_SIZE * 0.2)), (float) (y + (Constants.TILE_SIZE * 0.2)), Constants.TILE_SIZE * 0.5f, Constants.TILE_SIZE * .7f);
-        super((float) (x),(y), Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
+        hitbox = new HitBox ((x),(y), (float) ((float) Constants.TILE_SIZE * 0.8), (float) (Constants.TILE_SIZE * 1.));
 
         // Load individual textures
         idleFrame = new TextureRegion(new Texture("playerPlaceHolder1.png"));
@@ -218,27 +222,31 @@ public class Player extends HitBox {
     }
 
     public void update(float delta, List<WallTile> wallTiles, List<Enemy> enemies) {
-        float oldX = x, oldY = y; // Store old position to revert if collision occurs
+        float oldX = hitbox.getX(), oldY = hitbox.getY(); // Store old position to revert if collision occurs
         boolean isMoving = false;
 
         // Handle movement input
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            y += speed * delta;
+            //y += speed * delta;
+            hitbox.setY(hitbox.getY() + speed * delta);
             direction = Enums.Direction.UP;
             isMoving = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            x -= speed * delta;
+            //x -= speed * delta;
+            hitbox.setX(hitbox.getX() - speed * delta);
             direction = Enums.Direction.LEFT;
             isMoving = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            y -= speed * delta;
+            //y -= speed * delta;
+            hitbox.setY(hitbox.getY() - speed * delta);
             direction = Enums.Direction.DOWN;
             isMoving = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            x += speed * delta;
+            //x += speed * delta;
+            hitbox.setX(hitbox.getX() + speed * delta);
             direction = Enums.Direction.RIGHT;
             isMoving = true;
         }
@@ -249,11 +257,12 @@ public class Player extends HitBox {
             movementState = Enums.PlayerState.IDLE;
         }
 
-        setPosition(x, y);
+        //setPosition(x, y);
+        hitbox.setPosition(hitbox.getX(), hitbox.getY());
 
         for (WallTile wallTile : wallTiles) {
-            if (this.overlaps(wallTile)) {
-                setPosition(oldX, oldY);
+            if (hitbox.overlaps(wallTile)) {
+                hitbox.setPosition(oldX, oldY);
                 break;
             }
         }
@@ -330,7 +339,8 @@ public class Player extends HitBox {
     public void render(SpriteBatch batch) {
         TextureRegion currentFrame = null;
         Animation<TextureRegion> slashAnimation = null;
-        float slashX = x, slashY = y;
+        //float slashX = x, slashY = y;
+        float slashX = hitbox.getX(), slashY = hitbox.getY();
 
         // Handle movement animation
         if (movementState == Enums.PlayerState.WALKING) {
@@ -347,36 +357,59 @@ public class Player extends HitBox {
                 case LEFT:
                     slashAnimation = slashLeftAnimation;
                     currentFrame = attackLeftAnimation.getKeyFrame(stateTime, false);
-                    slashX = x - width;
+                    //slashX = x - width;
+                    slashX = hitbox.getX() - hitbox.getWidth();
                     break;
                 case RIGHT:
                     slashAnimation = slashRightAnimation;
                     currentFrame = attackRightAnimation.getKeyFrame(stateTime, false);
-                    slashX = x + width;
+                   // slashX = x + width;
+                    slashX = hitbox.getX() + hitbox.getWidth();
                     break;
                 case UP:
                     slashAnimation = slashUpAnimation;
                     currentFrame = attackRightAnimation.getKeyFrame(stateTime, false); // Assuming there's an up attack animation
-                    slashY = y + height;
+                    //slashY = y + height;
+                    slashY = hitbox.getY() + hitbox.getHeight();
                     break;
                 case DOWN:
                     slashAnimation = slashDownAnimation;
                     currentFrame = attackRightAnimation.getKeyFrame(stateTime, false); // Assuming there's a down attack animation
-                    slashY = y - height;
+                    //slashY = y - height;
+                    slashY = hitbox.getY() + hitbox.getHeight();
                     break;
             }
         }
 
         if (currentFrame != null) {
-            batch.draw(currentFrame, x, y, width, height);
+            //batch.draw(currentFrame, x, y, width , height);
+            //TODO need to off set the amount of hitbox size reduction so they line up change x and y
+            batch.draw(currentFrame, hitbox.getX() , hitbox.getY(), playerBodyTextureWidth , playerBodyTextureHeight);
         }
 
         // Render the slash effect
         if (slashAnimation != null && attackState == Enums.AttackState.ATTACKING) {
-            batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, width, height);
+            //batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, width, height);
+            float verticalWidth = Constants.TILE_SIZE * 3;
+            float verticalHeight = (float) (Constants.TILE_SIZE * 2);
+            float horizontalWidth = Constants.TILE_SIZE * 3;
+            float horizontalHeight = (float) (Constants.TILE_SIZE * 2);
+            switch (direction) {
+                case LEFT:
+                case RIGHT:
+                    batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, horizontalWidth, horizontalHeight);
+                    break;
+                case UP:
+                case DOWN:
+                    batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, verticalWidth, verticalHeight);
+                    break;
+            }
         }
     }
 
+    public HitBox getHitbox(){
+        return hitbox;
+    }
     public void dispose() {
         idleFrame.getTexture().dispose();
         walkLeftFrame1.dispose();

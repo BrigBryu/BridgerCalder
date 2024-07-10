@@ -92,7 +92,7 @@ public class DungeonScreen implements Screen {
     }
 
     private void updateCamera() {
-        camera.position.set(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2, 0);
+        camera.position.set(player.getHitbox().getX() + player.getHitbox().getWidth() / 2, player.getHitbox().getY() + player.getHitbox().getHeight() / 2, 0);
         camera.update();
     }
 
@@ -124,8 +124,8 @@ public class DungeonScreen implements Screen {
     }
 
     public boolean isPlayerInRoom() {
-        int playerX = (int) player.getX();
-        int playerY = (int) player.getY();
+        int playerX = (int) player.getHitbox().getX();
+        int playerY = (int) player.getHitbox().getY();
         return mapRenderer.getMap().isInRoom(playerX, playerY, dungeonGenerator.getRooms());
     }
 
