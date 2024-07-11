@@ -10,6 +10,7 @@ import com.mygdx.game.Boot;
 import com.mygdx.game.entities.Player;
 import com.mygdx.game.entities.enemies.BasicEnemy;
 import com.mygdx.game.entities.enemies.Enemy;
+import com.mygdx.game.util.AssetManager;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.world.DungeonGenerator;
 import com.mygdx.game.world.MapRenderer;
@@ -87,7 +88,6 @@ public class DungeonScreen implements Screen {
     private void checkUserInput(float delta) {
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             game.setScreen(new MenuScreen(game)); // Assuming you have a MenuScreen class
-            dispose();
             return;
         }
         player.update(delta, dungeonGenerator.getMap().getWallTiles(), enemies);
@@ -102,6 +102,21 @@ public class DungeonScreen implements Screen {
     private void updateCamera() {
         camera.position.set(player.getHitbox().getX() + player.getHitbox().getWidth() / 2, player.getHitbox().getY() + player.getHitbox().getHeight() / 2, 0);
         camera.update();
+    }
+
+    public boolean isPlayerInRoom() {
+        int playerX = (int) player.getHitbox().getX();
+        int playerY = (int) player.getHitbox().getY();
+        return mapRenderer.getMap().isInRoom(playerX, playerY, dungeonGenerator.getRooms());
+    }
+
+    public void updatePlayerSpeed() {
+        if (isPlayerInRoom()) {
+            player.resetSpeed(); // Reset to original speed if in a room
+        } else {
+            player.setOutOfRoomSpeed(); // Double the speed if not in a room
+
+        }
     }
 
     @Override
@@ -129,21 +144,9 @@ public class DungeonScreen implements Screen {
         for (Enemy enemy : enemies) {
             enemy.dispose();
         }
+        AssetManager.dispose();
     }
 
-    public boolean isPlayerInRoom() {
-        int playerX = (int) player.getHitbox().getX();
-        int playerY = (int) player.getHitbox().getY();
-        return mapRenderer.getMap().isInRoom(playerX, playerY, dungeonGenerator.getRooms());
-    }
 
-    public void updatePlayerSpeed() {
-        if (isPlayerInRoom()) {
-            player.resetSpeed(); // Reset to original speed if in a room
-        } else {
-            player.setOutOfRoomSpeed(); // Double the speed if not in a room
-
-        }
-    }
 
 }
