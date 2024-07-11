@@ -40,7 +40,7 @@ public class GameScreen implements Screen {
     }
 
     private void initializeEnemies() {
-        BasicEnemy enemy = new BasicEnemy(Constants.TILE_SIZE * 5, Constants.TILE_SIZE * 5, 100);
+        BasicEnemy enemy = new BasicEnemy(Constants.TILE_SIZE * 5, Constants.TILE_SIZE * 5, 100, camera);
         enemies.add(enemy);
 
         // Add more enemies as needed

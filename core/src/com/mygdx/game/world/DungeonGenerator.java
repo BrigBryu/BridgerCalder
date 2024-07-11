@@ -1,6 +1,10 @@
 package com.mygdx.game.world;
 
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.mygdx.game.entities.Player;
+import com.mygdx.game.entities.enemies.BasicEnemy;
+import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Zone;
 import com.mygdx.game.world.rooms.*;
@@ -15,16 +19,19 @@ import java.util.Random;
 public class DungeonGenerator {
     private List<Room> rooms;
     private List<Tile> hallwayTiles;
+    private List<Enemy> enemies;
     private Texture floorTexture, wallTexture, hallwayTexture, entryTexture;
     private Random rand;
     private Map map;
     private int startX;
     private int startY;
-    private int minRoomWidth = 10;
-    private int minRoomHeight = 10;
+    private int minRoomWidth = 30;
+    private int minRoomHeight = 30;
     private int minRoomDistApart = 2;
+    private OrthographicCamera camera;
 
-    public DungeonGenerator() {
+    public DungeonGenerator(OrthographicCamera camera) {
+        this.camera = camera;
         rooms = new ArrayList<>();
         hallwayTiles = new ArrayList<>();
         rand = new Random();
@@ -33,9 +40,11 @@ public class DungeonGenerator {
         hallwayTexture = new Texture("testHallway.png");
         entryTexture = new Texture("testSafe.png");
         map = new Map();
+        enemies = new ArrayList<>();
     }
 
     public void generateDungeon(int width, int height) {
+
         initializeDungeon(width, height);
 
         // Define zones
@@ -52,6 +61,8 @@ public class DungeonGenerator {
 
         // Populate the map again with hallways to ensure they can override room tiles if necessary
         populateMapWithHallways();
+
+        placeEnemies();
 
         //map.cleanUpIsolatedWalls();
     }
@@ -271,6 +282,43 @@ public class DungeonGenerator {
         }
     }
 
+    private void placeEnemies() {
+        List<int[]> potentialPositions = new ArrayList<>();
+
+        // Identify potential positions adjacent to hallways
+        for (Tile hallwayTile : hallwayTiles) {
+            int x = (int) (hallwayTile.getX() / Constants.TILE_SIZE);
+            int y = (int) (hallwayTile.getY() / Constants.TILE_SIZE);
+
+            // Check adjacent positions
+            checkAndAddPosition(potentialPositions, x + 1, y);
+            checkAndAddPosition(potentialPositions, x - 1, y);
+            checkAndAddPosition(potentialPositions, x, y + 1);
+            checkAndAddPosition(potentialPositions, x, y - 1);
+        }
+
+        // Randomly select positions to place enemies
+        int numEnemies = 100; // Adjust the number of enemies as needed
+        for (int i = 0; i < numEnemies && !potentialPositions.isEmpty(); i++) {
+            int index = rand.nextInt(potentialPositions.size());
+            int[] position = potentialPositions.remove(index);
+            float x = position[0] * Constants.TILE_SIZE;
+            float y = position[1] * Constants.TILE_SIZE;
+
+            // Create and add the enemy
+            BasicEnemy enemy = new BasicEnemy(x, y, 100, camera); // Adjust enemy parameters as needed
+            enemies.add(enemy);
+        }
+    }
+
+    private void checkAndAddPosition(List<int[]> positions, int x, int y) {
+        if (!map.isHallwayTile(x * Constants.TILE_SIZE, y * Constants.TILE_SIZE) &&
+                !map.isWallTile(x * Constants.TILE_SIZE, y * Constants.TILE_SIZE) &&
+                !map.isRoomTile(x * Constants.TILE_SIZE, y * Constants.TILE_SIZE)) {
+            positions.add(new int[]{x, y});
+        }
+    }
+
     public Map getMap() {
         return map;
     }
@@ -294,39 +342,7 @@ public class DungeonGenerator {
     public List<Room> getRooms() {
         return  rooms;
     }
+    public List<Enemy> getEnemies() {
+        return enemies;
+    }
 }
-
-
-//private void connectRooms(Room roomA, Room roomB) {
-//    int hallwayWidth = 2; // Set hallway width to 2 tiles
-//
-//    // Determine the edges of the rooms
-//    int roomAEdgeXLeft = roomA.getX();
-//    int roomAEdgeXRight = roomA.getX() + roomA.getWidth();
-//    int roomAEdgeYBottom = roomA.getY();
-//    int roomAEdgeYTop = roomA.getY() + roomA.getHeight();
-//
-//    int roomBEdgeXLeft = roomB.getX();
-//    int roomBEdgeXRight = roomB.getX() + roomB.getWidth();
-//    int roomBEdgeYBottom = roomB.getY();
-//    int roomBEdgeYTop = roomB.getY() + roomB.getHeight();
-//
-//    //generateHallway(int startX, int startY, int endX, int endY, int hallwayWidth)
-//    // Generate horizontal hallway
-//    if (roomAEdgeXRight <= roomBEdgeXLeft) {
-//        // Left-to-right
-//        generateHorizontalHallway(roomAEdgeXRight, roomAEdgeYBottom + (roomA.getHeight() / 2) - 1, roomBEdgeXLeft, roomBEdgeYBottom + (roomB.getHeight() / 2) - 1, hallwayWidth);
-//    } else {
-//        // Right-to-left
-//        generateHorizontalHallway(roomAEdgeXLeft, roomAEdgeYBottom + (roomA.getHeight() / 2) - 1, roomBEdgeXRight, roomBEdgeYBottom + (roomB.getHeight() / 2) - 1, hallwayWidth);
-//    }
-//
-//    // Generate vertical hallway
-//    if (roomAEdgeYTop <= roomBEdgeYBottom) {
-//        // Top-to-bottom
-//        generateVerticalHallway(roomAEdgeXLeft + (roomA.getWidth() / 2) - 1, roomAEdgeYTop, roomBEdgeXLeft + (roomB.getWidth() / 2) - 1, roomBEdgeYBottom, hallwayWidth);
-//    } else {
-//        // Bottom-to-top
-//        generateVerticalHallway(roomAEdgeXLeft + (roomA.getWidth() / 2) - 1, roomAEdgeYBottom, roomBEdgeXLeft + (roomB.getWidth() / 2) - 1, roomBEdgeYTop, hallwayWidth);
-//    }
-//}

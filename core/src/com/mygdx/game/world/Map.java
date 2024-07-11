@@ -9,7 +9,9 @@ import com.mygdx.game.world.tiles.Tile;
 import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.badlogic.gdx.math.MathUtils.random;
 import static com.mygdx.game.util.Constants.wallIntersectionsOn;
@@ -18,18 +20,22 @@ public class Map {
 
     private List<Tile> tiles;
     private List<WallTile> wallTiles;
+    private Set<String> roomTileSet;
+    private Set<String> wallTileSet;
     private Texture floorTexture;
     private Texture wallTexture;
 
     public Map() {
         tiles = new ArrayList<>();
         wallTiles = new ArrayList<>();
+        roomTileSet = new HashSet<>();
+        wallTileSet = new HashSet<>();
     }
 
     public void initialize() {
         // simple grid of tiles
         floorTexture = new Texture("testFloor.png");
-         wallTexture = new Texture("testWall.png");
+        wallTexture = new Texture("testWall.png");
 
         for (int y = 0; y < 20; y++) {
             for (int x = 0; x < 25; x++) {
@@ -37,7 +43,7 @@ public class Map {
             }
         }
         // Add wall tiles
-        wallTiles.add(new WallTile(3 * Constants.TILE_SIZE, 3 * Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE, wallTexture));
+        addWallTile(new WallTile(3 * Constants.TILE_SIZE, 3 * Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE, wallTexture));
     }
 
     public void render(SpriteBatch batch) {
@@ -63,7 +69,7 @@ public class Map {
     }
 
     public void addTile(Tile tile) {
-        if(tile instanceof WallTile && wallIntersectionsOn){
+        if (tile instanceof WallTile && wallIntersectionsOn) {
             addWallTile((WallTile) tile);
         } else {
             tiles.add(tile);
@@ -86,16 +92,16 @@ public class Map {
         }
         if (!intersects) {
             if (wallIntersectionsOn) {
-                wallTiles.add(wallTile);
+                addWallTile(wallTile);
             } else {
                 tiles.add(wallTile);
             }
         }
     }
 
-
     public void addWallTile(WallTile wallTile) {
         wallTiles.add(wallTile);
+        wallTileSet.add(wallTile.getX() / Constants.TILE_SIZE + "," + wallTile.getY() / Constants.TILE_SIZE);
     }
 
     public boolean intersectsWithRoom(Room room) {
@@ -127,7 +133,7 @@ public class Map {
         // no existing tile was replaced, add
         if (!replaced) {
             if (tile instanceof WallTile) {
-                wallTiles.add((WallTile) tile);
+                addWallTile((WallTile) tile);
             } else {
                 tiles.add(tile);
             }
@@ -135,7 +141,6 @@ public class Map {
     }
 
     public void addTileDestructiveWalls(Tile tile) {
-
         boolean replaced = false;
 
         // overlaps wall tile
@@ -151,7 +156,7 @@ public class Map {
         // no existing tile was replaced, add
         if (!replaced) {
             if (tile instanceof WallTile) {
-                wallTiles.add((WallTile) tile);
+                addWallTile((WallTile) tile);
             } else {
                 tiles.add(tile);
             }
@@ -165,7 +170,7 @@ public class Map {
 
         // Add the new tile to the appropriate list
         if (tile instanceof WallTile) {
-            wallTiles.add((WallTile) tile);
+            addWallTile((WallTile) tile);
         } else {
             tiles.add(tile);
         }
@@ -199,19 +204,6 @@ public class Map {
         }
         return false;
     }
-//
-//    public void cleanUpIsolatedWalls() {
-//        for (int i = 0; i < wallTiles.size(); i++) {
-//            WallTile wallTile = wallTiles.get(i);
-//            int wallCount = countAdjacentWalls(wallTile);
-//
-//            if (wallCount == 0 || wallCount == 2 || (wallCount == 3 && random.nextDouble() < 0.5)) {
-//                wallTiles.remove(i);
-//                tiles.add(new FloorTile(wallTile.getX(), wallTile.getY(), floorTexture));
-//                i--;
-//            }
-//        }
-//    }
 
     private int countAdjacentWalls(WallTile wallTile) {
         int count = 0;
@@ -252,4 +244,17 @@ public class Map {
         return false;
     }
 
+    public boolean isRoomTile(int x, int y) {
+        return roomTileSet.contains(x + "," + y);
+    }
+
+    public void addRoomTiles(Room room) {
+        for (Tile tile : room.getTiles()) {
+            roomTileSet.add(tile.getX() / Constants.TILE_SIZE + "," + tile.getY() / Constants.TILE_SIZE);
+        }
+    }
+
+    public boolean isWallTile(int x, int y) {
+        return wallTileSet.contains(x + "," + y);
+    }
 }

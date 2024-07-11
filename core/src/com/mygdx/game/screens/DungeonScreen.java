@@ -31,20 +31,21 @@ public class DungeonScreen implements Screen {
     public DungeonScreen(OrthographicCamera camera, Boot game) {
         this.camera = camera;
         this.batch = new SpriteBatch();
-        this.dungeonGenerator = new DungeonGenerator();
+        this.dungeonGenerator = new DungeonGenerator(camera);
         this.dungeonGenerator.generateDungeon(50, 50); // Example dimensions for the dungeon
         this.mapRenderer = new MapRenderer(dungeonGenerator.getMap());
         this.player = new Player(dungeonGenerator.getStartX() * Constants.TILE_SIZE, dungeonGenerator.getStartY() * Constants.TILE_SIZE, camera); // Set initial position of the player within the dungeon
 
         this.game = game;
         // Initialize enemies
-        enemies = new ArrayList<>();
-        initializeEnemies();
+        enemies = new ArrayList<>(dungeonGenerator.getEnemies());
+        initializeEnemiesNotFromDungeonGenerator();
     }
 
-    private void initializeEnemies() {
-        BasicEnemy enemy = new BasicEnemy(Constants.TILE_SIZE * 5, Constants.TILE_SIZE * 5, 100);
+    private void initializeEnemiesNotFromDungeonGenerator() {
+        BasicEnemy enemy = new BasicEnemy(Constants.TILE_SIZE * 5, Constants.TILE_SIZE * 5, 100, camera);
         enemies.add(enemy);
+
 
         // Add more enemies as needed
     }

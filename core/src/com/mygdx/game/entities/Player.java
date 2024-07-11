@@ -331,28 +331,28 @@ public class Player {
         switch (attackDirection) {
             case LEFT:
                 hitboxX = (float) (hitbox.getX() - hitbox.getWidth() - Constants.TILE_SIZE * 2.3);
-                attackHitBoxLeft.set(hitboxX, hitbox.getY(), Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
+                attackHitBoxLeft.set(hitboxX, hitbox.getY() - Constants.TILE_SIZE/2, Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
                 break;
             case RIGHT:
                 hitboxX = hitbox.getX() + hitbox.getWidth();
-                attackHitBoxRight.set(hitboxX, hitbox.getY(), Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
+                attackHitBoxRight.set(hitboxX, hitbox.getY() - Constants.TILE_SIZE/2, Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
                 break;
             case UP:
                 hitboxY = hitbox.getY() + hitbox.getHeight();
-                attackHitBoxUp.set(hitbox.getX(), hitboxY, Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
+                attackHitBoxUp.set(hitbox.getX()  - Constants.TILE_SIZE, hitboxY, Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
                 break;
             case DOWN:
                 hitboxY = (float) (hitbox.getY() - hitbox.getHeight() * 2.5);
-                attackHitBoxDown.set(hitbox.getX(), hitboxY, Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
+                attackHitBoxDown.set(hitbox.getX()  - Constants.TILE_SIZE, hitboxY, Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
                 break;
         }
 
         // Check for collision with enemies
         for (Enemy enemy : enemies) {
-            if ((attackDirection == Enums.Direction.LEFT && attackHitBoxLeft.overlaps(enemy)) ||
-                    (attackDirection == Enums.Direction.RIGHT && attackHitBoxRight.overlaps(enemy)) ||
-                    (attackDirection == Enums.Direction.UP && attackHitBoxUp.overlaps(enemy)) ||
-                    (attackDirection == Enums.Direction.DOWN && attackHitBoxDown.overlaps(enemy))) {
+            if ((attackDirection == Enums.Direction.LEFT && attackHitBoxLeft.overlaps(enemy.getHitbox())) ||
+                    (attackDirection == Enums.Direction.RIGHT && attackHitBoxRight.overlaps(enemy.getHitbox())) ||
+                    (attackDirection == Enums.Direction.UP && attackHitBoxUp.overlaps(enemy.getHitbox())) ||
+                    (attackDirection == Enums.Direction.DOWN && attackHitBoxDown.overlaps(enemy.getHitbox()))) {
                 doDamage(enemy);
             }
         }

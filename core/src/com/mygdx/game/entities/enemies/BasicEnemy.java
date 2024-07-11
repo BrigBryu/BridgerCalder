@@ -1,5 +1,6 @@
 package com.mygdx.game.entities.enemies;
 
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -11,8 +12,8 @@ public class BasicEnemy extends Enemy {
     private float speed;
     private float minX, maxX, minY, maxY; // Boundaries for square movement
 
-    public BasicEnemy(float x, float y, float health) {
-        super(x, y, Constants.TILE_SIZE, Constants.TILE_SIZE, health);
+    public BasicEnemy(float x, float y, float health, OrthographicCamera camera) {
+        super(x, y, Constants.TILE_SIZE, Constants.TILE_SIZE, health, camera);
         this.direction = Enums.Direction.RIGHT; // Start moving right
         this.speed = 200;
         loadAnimations();
@@ -53,47 +54,47 @@ public class BasicEnemy extends Enemy {
 
     @Override
     public void update(float delta) {
-        move(delta);
+        //move(delta);
         stateTime += delta;
     }
 
     @Override
     public void move(float delta) {
-        float oldX = x, oldY = y;
+        float oldX = hitbox.getX(), oldY = hitbox.getY();
         float distance = speed * delta;
 
         switch (direction) {
             case RIGHT:
-                x += distance;
-                if (x >= maxX) {
-                    x = maxX; // Correct overshooting
+                hitbox.setX(hitbox.getX() + distance);
+                if (hitbox.getX() >= maxX) {
+                    hitbox.setX(maxX); // Correct overshooting
                     direction = Enums.Direction.DOWN; // Change direction
                 }
                 break;
             case DOWN:
-                y -= distance;
-                if (y <= minY) {
-                    y = minY; // Correct overshooting
+                hitbox.setY(hitbox.getY() - distance);
+                if (hitbox.getY() <= minY) {
+                    hitbox.setY(minY); // Correct overshooting
                     direction = Enums.Direction.LEFT; // Change direction
                 }
                 break;
             case LEFT:
-                x -= distance;
-                if (x <= minX) {
-                    x = minX; // Correct overshooting
+                hitbox.setX(hitbox.getX() - distance);
+                if (hitbox.getX() <= minX) {
+                    hitbox.setX(minX); // Correct overshooting
                     direction = Enums.Direction.UP; // Change direction
                 }
                 break;
             case UP:
-                y += distance;
-                if (y >= maxY) {
-                    y = maxY; // Correct overshooting
+                hitbox.setY(hitbox.getY() + distance);
+                if (hitbox.getY() >= maxY) {
+                    hitbox.setY(maxY); // Correct overshooting
                     direction = Enums.Direction.RIGHT; // Change direction
                 }
                 break;
         }
 
-       // System.out.println("Moving " + direction + ": (" + oldX + ", " + oldY + ") -> (" + x + ", " + y + ")");
+        // System.out.println("Moving " + direction + ": (" + oldX + ", " + oldY + ") -> (" + x + ", " + y + ")");
     }
 
 
