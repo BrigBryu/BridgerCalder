@@ -16,5 +16,9 @@ git merge new-branch-name : Merges your branch with current (in this case would 
 git push origin master : After merging push changes to GitHub
 
 Updating a Branch
+git add .
+git commit -m "Adddescription"
+git push origin feature-branch
+
 git checkout new-branch-name : Goes to branch new-branch-name
 git pull origin master : Merges the changes master branch into new-branch-name. If there are any conflicts, you will need to resolve them

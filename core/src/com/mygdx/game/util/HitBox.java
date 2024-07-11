@@ -58,6 +58,14 @@ public class HitBox {
         return width;
     }
 
+    public void set(float hitboxX, float hitboxY, float hitboxWidth, float hitboxHeight){
+        setX(hitboxX);
+        setY(hitboxY);
+        setWidth(hitboxWidth);
+        setHeight(hitboxHeight);
+
+    }
+
     public void setWidth(float width) {
         this.width = width;
         this.bounds.setWidth(width);

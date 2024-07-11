@@ -61,11 +61,11 @@ public class MenuScreen implements Screen {
             y = Gdx.graphics.getHeight() - y; // Invert y-coordinate since screen coordinates start from top-left
 
             if (x > gameButtonX && x < gameButtonX + buttonWidth && y > buttonY && y < buttonY + buttonHeight) {
-                game.setScreen(new GameScreen(game.getOrthographicCamera()));
+                game.setScreen(new GameScreen(game.getOrthographicCamera(), game));
             }
 
             if (x > dungeonButtonX && x < dungeonButtonX + buttonWidth && y > buttonY && y < buttonY + buttonHeight) {
-                game.setScreen(new DungeonScreen(game.getOrthographicCamera()));
+                game.setScreen(new DungeonScreen(game.getOrthographicCamera(), game));
             }
         }
     }

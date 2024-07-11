@@ -1,11 +1,14 @@
 package com.mygdx.game.entities;
 
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Enums;
@@ -39,10 +42,13 @@ public class Player {
     private Enums.Direction direction;
     private Enums.PlayerState movementState;
     private Enums.AttackState attackState;
+    private Enums.Direction attackDirection = null;
 
-    private float speed = 200;
-    private float speedOutOfHall = (float) (speed * 2);
-    private float speedBase = 200 ;
+
+    private float speed = 0;
+    private float speedBase = 350 ;
+    private float speedOutOfHall = (float) (speedBase * 2);
+
 
 
     private HitBox hitbox;
@@ -55,7 +61,12 @@ public class Player {
     private HitBox attackHitBoxUp;
     private HitBox attackHitBoxDown;
 
-    public Player(float x, float y) {
+    private ShapeRenderer shapeRenderer;
+    private OrthographicCamera camera;
+
+
+    public Player(float x, float y, OrthographicCamera camera) {
+        this.camera = camera;
         //super((float) (x + (Constants.TILE_SIZE * 0.2)), (float) (y + (Constants.TILE_SIZE * 0.2)), Constants.TILE_SIZE * 0.5f, Constants.TILE_SIZE * .7f);
         hitbox = new HitBox ((x),(y), (float) ((float) Constants.TILE_SIZE * 0.8), (float) (Constants.TILE_SIZE * 1.));
 
@@ -141,27 +152,29 @@ public class Player {
         );
         walkRightAnimation.setPlayMode(Animation.PlayMode.LOOP);
 
+        float attackFrameDuration = .1f;
         // Create the attack animations
-        attackLeftAnimation = new Animation<TextureRegion>(0.1f,
+        attackRightAnimation = new Animation<TextureRegion>(attackFrameDuration,
                 new TextureRegion(attackLeftFrame1),
                 new TextureRegion(attackLeftFrame2),
                 new TextureRegion(attackLeftFrame3),
                 new TextureRegion(attackLeftFrame4),
                 new TextureRegion(attackLeftFrame5)
         );
-        attackLeftAnimation.setPlayMode(Animation.PlayMode.NORMAL);
+        attackRightAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
-        attackRightAnimation = new Animation<TextureRegion>(0.1f,
+        attackLeftAnimation = new Animation<TextureRegion>(attackFrameDuration,
                 new TextureRegion(attackRightFrame1),
                 new TextureRegion(attackRightFrame2),
                 new TextureRegion(attackRightFrame3),
                 new TextureRegion(attackRightFrame4),
                 new TextureRegion(attackRightFrame5)
         );
-        attackRightAnimation.setPlayMode(Animation.PlayMode.NORMAL);
+        attackLeftAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
+        float slashFrameDuration = .1f;
         // Create the slash animations
-        slashLeftAnimation = new Animation<TextureRegion>(0.1f,
+        slashLeftAnimation = new Animation<TextureRegion>(slashFrameDuration,
                 new TextureRegion(slashLeftFrame1),
                 new TextureRegion(slashLeftFrame2),
                 new TextureRegion(slashLeftFrame3),
@@ -173,7 +186,7 @@ public class Player {
         );
         slashLeftAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
-        slashRightAnimation = new Animation<TextureRegion>(0.1f,
+        slashRightAnimation = new Animation<TextureRegion>(slashFrameDuration,
                 new TextureRegion(slashRightFrame1),
                 new TextureRegion(slashRightFrame2),
                 new TextureRegion(slashRightFrame3),
@@ -185,7 +198,7 @@ public class Player {
         );
         slashRightAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
-        slashUpAnimation = new Animation<TextureRegion>(0.1f,
+        slashUpAnimation = new Animation<TextureRegion>(attackFrameDuration,
                 new TextureRegion(slashUpFrame1),
                 new TextureRegion(slashUpFrame2),
                 new TextureRegion(slashUpFrame3),
@@ -197,7 +210,7 @@ public class Player {
         );
         slashUpAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
-        slashDownAnimation = new Animation<TextureRegion>(0.1f,
+        slashDownAnimation = new Animation<TextureRegion>(attackFrameDuration,
                 new TextureRegion(slashDownFrame1),
                 new TextureRegion(slashDownFrame2),
                 new TextureRegion(slashDownFrame3),
@@ -219,58 +232,80 @@ public class Player {
         attackHitBoxRight = new HitBox(x + Constants.TILE_SIZE, y, Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
         attackHitBoxUp = new HitBox(x, y + Constants.TILE_SIZE * 2, Constants.TILE_SIZE, Constants.TILE_SIZE);
         attackHitBoxDown = new HitBox(x, y - Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
+
+        shapeRenderer = new ShapeRenderer();
     }
 
     public void update(float delta, List<WallTile> wallTiles, List<Enemy> enemies) {
-        float oldX = hitbox.getX(), oldY = hitbox.getY(); // Store old position to revert if collision occurs
-        boolean isMoving = false;
+        if (attackState != Enums.AttackState.ATTACKING) {
+            float oldX = hitbox.getX(), oldY = hitbox.getY(); // Store old position to revert if collision occurs
+            boolean isMoving = false;
 
-        // Handle movement input
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            //y += speed * delta;
-            hitbox.setY(hitbox.getY() + speed * delta);
-            direction = Enums.Direction.UP;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            //x -= speed * delta;
-            hitbox.setX(hitbox.getX() - speed * delta);
-            direction = Enums.Direction.LEFT;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            //y -= speed * delta;
-            hitbox.setY(hitbox.getY() - speed * delta);
-            direction = Enums.Direction.DOWN;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            //x += speed * delta;
-            hitbox.setX(hitbox.getX() + speed * delta);
-            direction = Enums.Direction.RIGHT;
-            isMoving = true;
-        }
+            // Handle movement input
+            if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                //y += speed * delta;
+                hitbox.setY(hitbox.getY() + speed * delta);
+                direction = Enums.Direction.UP;
+                isMoving = true;
+            }
 
-        if (isMoving) {
-            movementState = Enums.PlayerState.WALKING;
-        } else {
-            movementState = Enums.PlayerState.IDLE;
-        }
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                //y -= speed * delta;
+                hitbox.setY(hitbox.getY() - speed * delta);
+                direction = Enums.Direction.DOWN;
+                isMoving = true;
+            }
 
-        //setPosition(x, y);
-        hitbox.setPosition(hitbox.getX(), hitbox.getY());
+            //setPosition(x, y);
+            hitbox.setPosition(hitbox.getX(), hitbox.getY());
 
-        for (WallTile wallTile : wallTiles) {
-            if (hitbox.overlaps(wallTile)) {
-                hitbox.setPosition(oldX, oldY);
-                break;
+            for (WallTile wallTile : wallTiles) {
+                if (hitbox.overlaps(wallTile)) {
+                    hitbox.setPosition(oldX, oldY);
+                    break;
+                }
+            }
+
+            oldX = hitbox.getX();
+            oldY = hitbox.getY();
+
+
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                //x -= speed * delta;
+                hitbox.setX(hitbox.getX() - speed * delta);
+                direction = Enums.Direction.LEFT;
+                isMoving = true;
+            }
+
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                //x += speed * delta;
+                hitbox.setX(hitbox.getX() + speed * delta);
+                direction = Enums.Direction.RIGHT;
+                isMoving = true;
+            }
+
+            //setPosition(x, y);
+            hitbox.setPosition(hitbox.getX(), hitbox.getY());
+
+            for (WallTile wallTile : wallTiles) {
+                if (hitbox.overlaps(wallTile)) {
+                    hitbox.setPosition(oldX, oldY);
+                    break;
+                }
+            }
+
+            if (isMoving) {
+                movementState = Enums.PlayerState.WALKING;
+            } else {
+                movementState = Enums.PlayerState.IDLE;
             }
         }
 
         // Handle attack input
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && attackState == Enums.AttackState.NOT_ATTACKING) {
-            Gdx.app.log("Player", "Attack initiated");
+           // Gdx.app.log("Player", "Attack initiated");
             attackState = Enums.AttackState.ATTACKING;
+            attackDirection = direction;
             stateTime = 0f;
             activateAttackHitBox(enemies);
         }
@@ -278,14 +313,48 @@ public class Player {
         // Update attack state
         if (attackState == Enums.AttackState.ATTACKING) {
             stateTime += delta;
-            Gdx.app.log("Player", "Attacking: " + stateTime + "/" + attackRightAnimation.getAnimationDuration());
+            //Gdx.app.log("Player", "Attacking: " + stateTime + "/" + attackRightAnimation.getAnimationDuration());
             if (stateTime > attackRightAnimation.getAnimationDuration()) {
-                Gdx.app.log("Player", "Attack finished");
+           //     Gdx.app.log("Player", "Attack finished");
                 attackState = Enums.AttackState.NOT_ATTACKING;
                 stateTime = 0f;
             }
         } else {
             stateTime += delta;
+        }
+    }
+
+    private void activateAttackHitBox(List<Enemy> enemies) {
+        float hitboxX = hitbox.getX();
+        float hitboxY = hitbox.getY();
+
+        switch (attackDirection) {
+            case LEFT:
+                hitboxX = (float) (hitbox.getX() - hitbox.getWidth() - Constants.TILE_SIZE * 2.3);
+                attackHitBoxLeft.set(hitboxX, hitbox.getY(), Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
+                break;
+            case RIGHT:
+                hitboxX = hitbox.getX() + hitbox.getWidth();
+                attackHitBoxRight.set(hitboxX, hitbox.getY(), Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
+                break;
+            case UP:
+                hitboxY = hitbox.getY() + hitbox.getHeight();
+                attackHitBoxUp.set(hitbox.getX(), hitboxY, Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
+                break;
+            case DOWN:
+                hitboxY = (float) (hitbox.getY() - hitbox.getHeight() * 2.5);
+                attackHitBoxDown.set(hitbox.getX(), hitboxY, Constants.TILE_SIZE * 3, Constants.TILE_SIZE * 3);
+                break;
+        }
+
+        // Check for collision with enemies
+        for (Enemy enemy : enemies) {
+            if ((attackDirection == Enums.Direction.LEFT && attackHitBoxLeft.overlaps(enemy)) ||
+                    (attackDirection == Enums.Direction.RIGHT && attackHitBoxRight.overlaps(enemy)) ||
+                    (attackDirection == Enums.Direction.UP && attackHitBoxUp.overlaps(enemy)) ||
+                    (attackDirection == Enums.Direction.DOWN && attackHitBoxDown.overlaps(enemy))) {
+                doDamage(enemy);
+            }
         }
     }
 
@@ -305,106 +374,116 @@ public class Player {
         this.speed = speedBase;
     }
 
-    private void activateAttackHitBox(List<Enemy> enemies) {
-        HitBox attackHitBox = null;
-        switch (direction) {
-            case LEFT:
-                attackHitBox = attackHitBoxLeft;
-                break;
-            case RIGHT:
-                attackHitBox = attackHitBoxRight;
-                break;
-            case UP:
-                attackHitBox = attackHitBoxUp;
-                break;
-            case DOWN:
-                attackHitBox = attackHitBoxDown;
-                break;
-        }
-
-        if (attackHitBox != null) {
-            for (Enemy enemy : enemies) {
-                if (attackHitBox.overlaps(enemy)) {
-                    doDamage(enemy);
-                }
-            }
-        }
-    }
-
     private void doDamage(Enemy enemy) {
         // Implement damage logic here
-        System.out.println("Damage doing");
+        System.out.println("Damage doing " + direction);
     }
 
-    public void render(SpriteBatch batch) {
-        TextureRegion currentFrame = null;
-        Animation<TextureRegion> slashAnimation = null;
-        //float slashX = x, slashY = y;
-        float slashX = hitbox.getX(), slashY = hitbox.getY();
+public void render(SpriteBatch batch) {
+    TextureRegion currentFrame = null;
+    Animation<TextureRegion> slashAnimation = null;
+    float slashX = hitbox.getX() - Constants.TILE_SIZE, slashY = hitbox.getY() - Constants.TILE_SIZE / 2;
 
-        // Handle movement animation
-        if (movementState == Enums.PlayerState.WALKING) {
-            currentFrame = direction == Enums.Direction.LEFT ?
-                    walkLeftAnimation.getKeyFrame(stateTime, true) :
-                    walkRightAnimation.getKeyFrame(stateTime, true);
-        } else {
-            currentFrame = idleFrame;
+    // Handle movement animation
+    if (movementState == Enums.PlayerState.WALKING) {
+        currentFrame = direction == Enums.Direction.LEFT ?
+                walkLeftAnimation.getKeyFrame(stateTime, true) :
+                walkRightAnimation.getKeyFrame(stateTime, true);
+    } else {
+        currentFrame = idleFrame;
+    }
+
+    // Handle attack animation
+    if (attackState == Enums.AttackState.ATTACKING) {
+        if (attackDirection == null) {
+            attackDirection = direction;
         }
+        switch (attackDirection) {
+            case LEFT:
+                slashAnimation = slashLeftAnimation;
+                currentFrame = attackLeftAnimation.getKeyFrame(stateTime, false);
+                slashX = (float) (hitbox.getX() - hitbox.getWidth() - Constants.TILE_SIZE * 2.3);
+                break;
+            case RIGHT:
+                slashAnimation = slashRightAnimation;
+                currentFrame = attackRightAnimation.getKeyFrame(stateTime, false);
+                slashX = hitbox.getX() + hitbox.getWidth();
+                break;
+            case UP:
+                slashAnimation = slashUpAnimation;
+                currentFrame = attackRightAnimation.getKeyFrame(stateTime, false);
+                slashY = hitbox.getY() + hitbox.getHeight();
+                break;
+            case DOWN:
+                slashAnimation = slashDownAnimation;
+                currentFrame = attackLeftAnimation.getKeyFrame(stateTime, false);
+                slashY = (float) (hitbox.getY() - hitbox.getHeight() * 2.5);
+                break;
+        }
+    } else {
+        attackDirection = null; // Reset attack direction when not attacking
+    }
 
-        // Handle attack animation
+    if (currentFrame != null) {
+        // Drawing the player sprite
+        batch.draw(currentFrame, hitbox.getX(), hitbox.getY(), playerBodyTextureWidth, playerBodyTextureHeight);
+    }
+
+    // Render the slash effect
+    if (slashAnimation != null && attackState == Enums.AttackState.ATTACKING) {
+        float verticalWidth = Constants.TILE_SIZE * 3;
+        float verticalHeight = Constants.TILE_SIZE * 3;
+        float horizontalWidth = Constants.TILE_SIZE * 3;
+        float horizontalHeight = Constants.TILE_SIZE * 3;
+
+        switch (attackDirection) {
+            case LEFT:
+            case RIGHT:
+                batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, horizontalWidth, horizontalHeight);
+                break;
+            case UP:
+            case DOWN:
+                batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, verticalWidth, verticalHeight);
+                break;
+        }
+    }
+
+    // Draw hitboxes after sprite batch ends
+    batch.end();
+    if (Constants.DRAW_HIT_BOXES) {
+        drawHitboxes();
+    }
+    batch.begin();
+}
+
+    private void drawHitboxes() {
+        shapeRenderer.setProjectionMatrix(camera.combined); // Set the projection matrix
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        // Draw player hitbox
+        shapeRenderer.setColor(1, 0, 0, 1); // Red for player hitbox
+        shapeRenderer.rect(hitbox.getX(), hitbox.getY(), hitbox.getWidth(), hitbox.getHeight());
+
+        // Draw attack hitbox if attacking
         if (attackState == Enums.AttackState.ATTACKING) {
-            switch (direction) {
+            shapeRenderer.setColor(0, 1, 0, 1); // Green for attack hitboxes
+            switch (attackDirection) {
                 case LEFT:
-                    slashAnimation = slashLeftAnimation;
-                    currentFrame = attackLeftAnimation.getKeyFrame(stateTime, false);
-                    //slashX = x - width;
-                    slashX = hitbox.getX() - hitbox.getWidth();
+                    shapeRenderer.rect(attackHitBoxLeft.getX(), attackHitBoxLeft.getY(), attackHitBoxLeft.getWidth(), attackHitBoxLeft.getHeight());
                     break;
                 case RIGHT:
-                    slashAnimation = slashRightAnimation;
-                    currentFrame = attackRightAnimation.getKeyFrame(stateTime, false);
-                   // slashX = x + width;
-                    slashX = hitbox.getX() + hitbox.getWidth();
+                    shapeRenderer.rect(attackHitBoxRight.getX(), attackHitBoxRight.getY(), attackHitBoxRight.getWidth(), attackHitBoxRight.getHeight());
                     break;
                 case UP:
-                    slashAnimation = slashUpAnimation;
-                    currentFrame = attackRightAnimation.getKeyFrame(stateTime, false); // Assuming there's an up attack animation
-                    //slashY = y + height;
-                    slashY = hitbox.getY() + hitbox.getHeight();
+                    shapeRenderer.rect(attackHitBoxUp.getX(), attackHitBoxUp.getY(), attackHitBoxUp.getWidth(), attackHitBoxUp.getHeight());
                     break;
                 case DOWN:
-                    slashAnimation = slashDownAnimation;
-                    currentFrame = attackRightAnimation.getKeyFrame(stateTime, false); // Assuming there's a down attack animation
-                    //slashY = y - height;
-                    slashY = hitbox.getY() + hitbox.getHeight();
+                    shapeRenderer.rect(attackHitBoxDown.getX(), attackHitBoxDown.getY(), attackHitBoxDown.getWidth(), attackHitBoxDown.getHeight());
                     break;
             }
         }
 
-        if (currentFrame != null) {
-            //batch.draw(currentFrame, x, y, width , height);
-            //TODO need to off set the amount of hitbox size reduction so they line up change x and y
-            batch.draw(currentFrame, hitbox.getX() , hitbox.getY(), playerBodyTextureWidth , playerBodyTextureHeight);
-        }
-
-        // Render the slash effect
-        if (slashAnimation != null && attackState == Enums.AttackState.ATTACKING) {
-            //batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, width, height);
-            float verticalWidth = Constants.TILE_SIZE * 3;
-            float verticalHeight = (float) (Constants.TILE_SIZE * 2);
-            float horizontalWidth = Constants.TILE_SIZE * 3;
-            float horizontalHeight = (float) (Constants.TILE_SIZE * 2);
-            switch (direction) {
-                case LEFT:
-                case RIGHT:
-                    batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, horizontalWidth, horizontalHeight);
-                    break;
-                case UP:
-                case DOWN:
-                    batch.draw(slashAnimation.getKeyFrame(stateTime, false), slashX, slashY, verticalWidth, verticalHeight);
-                    break;
-            }
-        }
+        shapeRenderer.end();
     }
 
     public HitBox getHitbox(){
@@ -464,5 +543,6 @@ public class Player {
         slashDownFrame6.dispose();
         slashDownFrame7.dispose();
         slashDownFrame8.dispose();
+        shapeRenderer.dispose();
     }
 }

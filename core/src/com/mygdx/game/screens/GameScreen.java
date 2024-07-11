@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.Boot;
 import com.mygdx.game.entities.Player;
 import com.mygdx.game.entities.enemies.BasicEnemy;
 import com.mygdx.game.entities.enemies.Enemy;
@@ -22,14 +23,16 @@ public class GameScreen implements Screen {
     private Player player;
     private Map map;
     private List<Enemy> enemies;
+    private Boot game;
 
-    public GameScreen(OrthographicCamera camera) {
+    public GameScreen(OrthographicCamera camera, Boot game) {
         this.camera = camera;
         this.batch = new SpriteBatch();
         this.map = new Map();
         this.map.initialize(); // Make sure to initialize the map
         this.mapRenderer = new MapRenderer(map);
-        this.player = new Player(100, 100); // Set initial position of the player
+        this.game = game;
+        this.player = new Player(100, 100, camera); // Set initial position of the player
 
         // Initialize enemies
         enemies = new ArrayList<>();

@@ -1,17 +1,18 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.Boot;
 import com.mygdx.game.entities.Player;
 import com.mygdx.game.entities.enemies.BasicEnemy;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.world.DungeonGenerator;
 import com.mygdx.game.world.MapRenderer;
-import com.mygdx.game.world.rooms.Room;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,16 +24,18 @@ public class DungeonScreen implements Screen {
     private Player player;
     private DungeonGenerator dungeonGenerator;
     private List<Enemy> enemies;
+    private Boot game;
 
 
-    public DungeonScreen(OrthographicCamera camera) {
+    public DungeonScreen(OrthographicCamera camera, Boot game) {
         this.camera = camera;
         this.batch = new SpriteBatch();
         this.dungeonGenerator = new DungeonGenerator();
         this.dungeonGenerator.generateDungeon(50, 50); // Example dimensions for the dungeon
         this.mapRenderer = new MapRenderer(dungeonGenerator.getMap());
-        this.player = new Player(dungeonGenerator.getStartX() * Constants.TILE_SIZE, dungeonGenerator.getStartY() * Constants.TILE_SIZE); // Set initial position of the player within the dungeon
+        this.player = new Player(dungeonGenerator.getStartX() * Constants.TILE_SIZE, dungeonGenerator.getStartY() * Constants.TILE_SIZE, camera); // Set initial position of the player within the dungeon
 
+        this.game = game;
         // Initialize enemies
         enemies = new ArrayList<>();
         initializeEnemies();
@@ -82,6 +85,11 @@ public class DungeonScreen implements Screen {
     }
 
     private void checkUserInput(float delta) {
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+            game.setScreen(new MenuScreen(game)); // Assuming you have a MenuScreen class
+            dispose();
+            return;
+        }
         player.update(delta, dungeonGenerator.getMap().getWallTiles(), enemies);
     }
 
@@ -131,11 +139,9 @@ public class DungeonScreen implements Screen {
 
     public void updatePlayerSpeed() {
         if (isPlayerInRoom()) {
-            System.out.println("in room");
             player.resetSpeed(); // Reset to original speed if in a room
         } else {
             player.setOutOfRoomSpeed(); // Double the speed if not in a room
-            System.out.println("not in room");
 
         }
     }

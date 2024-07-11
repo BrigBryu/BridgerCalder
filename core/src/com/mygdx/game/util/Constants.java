@@ -7,6 +7,7 @@ public class Constants {
     public static final int MAX_ROOM_GAP = 5; // Maximum gap between rooms
     public static final int HALLWAY_WIDTH = 3; // Width of the hallways
     public static final boolean wallIntersectionsOn = true;
+    public static final boolean DRAW_HIT_BOXES = true;
 
     public static final int EMPTY = 0;
     public static final int WALL = 1;
