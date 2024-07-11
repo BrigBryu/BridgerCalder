@@ -11,6 +11,8 @@ import com.mygdx.game.util.HitBox;
 
 public abstract class Enemy extends HitBox {
     protected float health;
+    private float displayDamageTime = 0;
+    private static final float DAMAGE_DISPLAY_DURATION = 0.5f;  // Duration to display the damage bar
 
     protected Animation<TextureRegion> walkLeftAnimation;
     protected Animation<TextureRegion> walkRightAnimation;
@@ -20,9 +22,8 @@ public abstract class Enemy extends HitBox {
 
     protected TextureRegion idleFrame;
     protected Enums.Direction direction;
+    private float previousHealth;
 
-    private float displayDamageTime = 0;
-    private static final float DAMAGE_DISPLAY_DURATION = 0.5f;  // Duration to display the damage bar
 
     public Enemy(float x, float y, float width, float height, float health) {
         super(x, y, width, height);
@@ -70,11 +71,12 @@ public abstract class Enemy extends HitBox {
     }
 
     public void takeDamage(float damage) {
+        previousHealth = health;
         health -= damage;
         if (health < 0) health = 0;
         displayDamageTime = DAMAGE_DISPLAY_DURATION;
         if (health <= 0) {
-            // Handle enemy death TODO
+            // Handle enemy death (e.g., remove from game, play death animation)
         }
     }
 
@@ -85,13 +87,16 @@ public abstract class Enemy extends HitBox {
         float barY = y + height + 10;
 
         float healthPercentage = health / 100f;
+        float previousHealthPercentage = previousHealth / 100f;
+
 
         // Draw background
         batch.draw(AssetManager.healthBarBackground, barX, barY, barWidth, barHeight);
 
         // Draw damage bar if needed
         if (displayDamageTime > 0) {
-            batch.draw(AssetManager.healthBarDamage, barX, barY, barWidth, barHeight);
+            float damageWidth = barWidth * (previousHealthPercentage - healthPercentage);
+            batch.draw(AssetManager.healthBarDamage, barX + barWidth * healthPercentage, barY, damageWidth, barHeight);
             displayDamageTime -= Gdx.graphics.getDeltaTime();
         }
 

@@ -376,6 +376,7 @@ public class Player {
 
     private void doDamage(Enemy enemy) {
         // Implement damage logic here
+        enemy.takeDamage(10);
         System.out.println("Damage doing " + direction);
     }
 
