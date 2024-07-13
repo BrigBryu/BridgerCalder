@@ -88,7 +88,7 @@ public class DungeonScreen implements Screen {
 
     private void checkUserInput(float delta) {
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
-            game.setScreen(new MenuScreen(game)); // Assuming you have a MenuScreen class
+            game.setScreen(new MenuScreen(game));
             return;
         }
         player.update(delta, dungeonGenerator.getMap().getWallTiles(), enemies);
@@ -121,10 +121,28 @@ public class DungeonScreen implements Screen {
     }
 
     @Override
+//    public void resize(int width, int height) {
+//        // Adjust the camera viewport size based on the window size
+//        camera.viewportWidth = (float) (width * Constants.TILE_SIZE / 2) / 22; // should be based on tile size
+//        camera.viewportHeight = (float) (height * Constants.TILE_SIZE / 2) / 22;
+//        camera.update();
+//    }
+
     public void resize(int width, int height) {
-        // Adjust the camera viewport size based on the window size
-        camera.viewportWidth = (float) (width * Constants.TILE_SIZE / 2) / 22; // should be based on tile size
-        camera.viewportHeight = (float) (height * Constants.TILE_SIZE / 2) / 22;
+        float aspectRatio = (float) width / height;
+
+        //Stolen :)
+        if (aspectRatio >= 1.0f) {
+            // Landscape orientation or square
+            camera.viewportWidth = Constants.VIEWPORT_WIDTH;
+            camera.viewportHeight = Constants.VIEWPORT_WIDTH / aspectRatio;
+        } else {
+            // Portrait orientation
+            camera.viewportWidth = Constants.VIEWPORT_HEIGHT * aspectRatio;
+            camera.viewportHeight = Constants.VIEWPORT_HEIGHT;
+        }
+
+        // apply the changes
         camera.update();
     }
 
