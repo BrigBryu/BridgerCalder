@@ -1,0 +1,18 @@
+Basic Controls:
+Light Attack (L)
+Heavy Attack (H)
+Dash: Shift + direction
+Speed Buff: Q key (on a cool down)
+
+Advanced
+Light Attack gives speed buff time
+Heavy Attack reduces speed buff cool down
+Dash: Shift + direction kills or some damage threshold let dash again otherwise medium cool down
+
+H+ = supper
+Combo Examples:
+Basic Combo: L -> L -> L -> H+
+Dash Combo: L -> Dash -> H+
+Speed Buff Combo: SB -> L -> L -> H
+Timing Bonus Combo: Perfectly timed L → L → H
+Flow State Combo: L → L → Dash → L → H
