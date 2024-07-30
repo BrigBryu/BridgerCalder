@@ -16,13 +16,13 @@ public abstract class Enemy {
     private float displayDamageTime = 0;
     private static final float DAMAGE_DISPLAY_DURATION = 0.5f;  // Duration to display the damage bar
 
+    protected Animation<TextureRegion> idleAnimation;
     protected Animation<TextureRegion> walkLeftAnimation;
     protected Animation<TextureRegion> walkRightAnimation;
     protected Animation<TextureRegion> walkUpAnimation;
     protected Animation<TextureRegion> walkDownAnimation;
     protected float stateTime;
 
-    protected TextureRegion idleFrame;
     protected Enums.Direction direction;
     private float previousHealth;
 
@@ -39,12 +39,12 @@ public abstract class Enemy {
         loadAnimations();
     }
 
-    protected void setAnimations(Texture idleTexture,
+    protected void setAnimations(Animation<TextureRegion> idleAnimation,
                                  Animation<TextureRegion> walkLeftAnimation,
                                  Animation<TextureRegion> walkRightAnimation,
                                  Animation<TextureRegion> walkUpAnimation,
                                  Animation<TextureRegion> walkDownAnimation) {
-        this.idleFrame = new TextureRegion(idleTexture);
+        this.idleAnimation = idleAnimation;
         this.walkLeftAnimation = walkLeftAnimation;
         this.walkRightAnimation = walkRightAnimation;
         this.walkUpAnimation = walkUpAnimation;
@@ -66,10 +66,12 @@ public abstract class Enemy {
             case DOWN:
                 currentAnimation = walkDownAnimation;
                 break;
+            default:
+                currentAnimation = idleAnimation;
+                break;
         }
 
-        TextureRegion currentFrame = currentAnimation != null ?
-                currentAnimation.getKeyFrame(stateTime, true) : idleFrame;
+        TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
 
         batch.draw(currentFrame, hitbox.getX(), hitbox.getY(), hitbox.getWidth(), hitbox.getHeight());
 
@@ -120,7 +122,7 @@ public abstract class Enemy {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
         // Draw enemy hitbox
-        shapeRenderer.setColor(1, 1, 0, 1); // Red for enemy hitbox
+        shapeRenderer.setColor(1, 1, 0, 1); // Yellow for enemy hitbox
         shapeRenderer.rect(hitbox.getX(), hitbox.getY(), hitbox.getWidth(), hitbox.getHeight());
 
         shapeRenderer.end();
@@ -135,7 +137,11 @@ public abstract class Enemy {
     }
 
     public void dispose() {
-        idleFrame.getTexture().dispose();
+        if (idleAnimation != null) {
+            for (TextureRegion frame : idleAnimation.getKeyFrames()) {
+                frame.getTexture().dispose();
+            }
+        }
         if (walkLeftAnimation != null) {
             for (TextureRegion frame : walkLeftAnimation.getKeyFrames()) {
                 frame.getTexture().dispose();

@@ -13,6 +13,6 @@ H+ = supper
 Combo Examples:
 Basic Combo: L -> L -> L -> H+
 Dash Combo: L -> Dash -> H+
-Speed Buff Combo: SB -> L -> L -> H
-Timing Bonus Combo: Perfectly timed L → L → H
-Flow State Combo: L → L → Dash → L → H
+Speed Buff Combo: SB -> L -> L -> H+
+Timing Bonus Combo: Perfectly timed L → L → H+
+Flow State Combo: L → L → Dash → L → H+
