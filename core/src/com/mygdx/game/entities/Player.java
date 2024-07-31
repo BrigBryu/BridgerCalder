@@ -22,8 +22,10 @@ public class Player {
 
     private Animation<TextureRegion> idleAnimation;
     private Animation<TextureRegion> walkAnimation;
-    private Animation<TextureRegion> attackHorizontal1Animation;
-    private Animation<TextureRegion> attackHorizontal2Animation;
+    private Animation<TextureRegion> attackRight1Animation;
+    private Animation<TextureRegion> attackRight2Animation;
+    private Animation<TextureRegion> attackLeft1Animation;
+    private Animation<TextureRegion> attackLeft2Animation;
     private Animation<TextureRegion> attackDown1Animation;
     private Animation<TextureRegion> attackDown2Animation;
     private Animation<TextureRegion> attackUp1Animation;
@@ -34,6 +36,7 @@ public class Player {
     private Enums.PlayerState movementState;
     private Enums.AttackState attackState;
     private Enums.Direction attackDirection = null;
+    private boolean useAttack1 = true;
 
     private float speed = 0;
     private float speedBase = 350;
@@ -63,8 +66,10 @@ public class Player {
         // Use loops to assign frames to animations
         TextureRegion[] idleFrames = new TextureRegion[6];
         TextureRegion[] walkFrames = new TextureRegion[6];
-        TextureRegion[] attackHorizontal1Frames = new TextureRegion[6];
-        TextureRegion[] attackHorizontal2Frames = new TextureRegion[6];
+        TextureRegion[] attackRight1Frames = new TextureRegion[6];
+        TextureRegion[] attackRight2Frames = new TextureRegion[6];
+        TextureRegion[] attackLeft1Frames = new TextureRegion[6];
+        TextureRegion[] attackLeft2Frames = new TextureRegion[6];
         TextureRegion[] attackDown1Frames = new TextureRegion[6];
         TextureRegion[] attackDown2Frames = new TextureRegion[6];
         TextureRegion[] attackUp1Frames = new TextureRegion[6];
@@ -73,18 +78,26 @@ public class Player {
         for (int i = 0; i < 6; i++) {
             idleFrames[i] = tmp[0][i];
             walkFrames[i] = tmp[1][i];
-            attackHorizontal1Frames[i] = tmp[2][i];
-            attackHorizontal2Frames[i] = tmp[3][i];
+            attackRight1Frames[i] = tmp[2][i];
+            attackRight2Frames[i] = tmp[3][i];
             attackDown1Frames[i] = tmp[4][i];
             attackDown2Frames[i] = tmp[5][i];
             attackUp1Frames[i] = tmp[6][i];
             attackUp2Frames[i] = tmp[7][i];
+
+            // Copy and flip right attack frames for left attack animations
+            attackLeft1Frames[i] = new TextureRegion(attackRight1Frames[i]);
+            attackLeft1Frames[i].flip(true, false);
+            attackLeft2Frames[i] = new TextureRegion(attackRight2Frames[i]);
+            attackLeft2Frames[i].flip(true, false);
         }
 
         idleAnimation = createAnimation(idleFrames, PLAYER_ANIMATION_SPEED);
         walkAnimation = createAnimation(walkFrames, PLAYER_ANIMATION_SPEED);
-        attackHorizontal1Animation = createAnimation(attackHorizontal1Frames, PLAYER_ANIMATION_SPEED);
-        attackHorizontal2Animation = createAnimation(attackHorizontal2Frames, PLAYER_ANIMATION_SPEED);
+        attackRight1Animation = createAnimation(attackRight1Frames, PLAYER_ANIMATION_SPEED);
+        attackRight2Animation = createAnimation(attackRight2Frames, PLAYER_ANIMATION_SPEED);
+        attackLeft1Animation = createAnimation(attackLeft1Frames, PLAYER_ANIMATION_SPEED);
+        attackLeft2Animation = createAnimation(attackLeft2Frames, PLAYER_ANIMATION_SPEED);
         attackDown1Animation = createAnimation(attackDown1Frames, PLAYER_ANIMATION_SPEED);
         attackDown2Animation = createAnimation(attackDown2Frames, PLAYER_ANIMATION_SPEED);
         attackUp1Animation = createAnimation(attackUp1Frames, PLAYER_ANIMATION_SPEED);
@@ -171,13 +184,14 @@ public class Player {
             attackState = Enums.AttackState.ATTACKING;
             attackDirection = direction;
             stateTime = 0f;
+            useAttack1 = !useAttack1; // Toggle attack animation
             activateAttackHitBox(enemies);
         }
 
         // Update attack state
         if (attackState == Enums.AttackState.ATTACKING) {
             stateTime += delta;
-            if (stateTime > attackHorizontal1Animation.getAnimationDuration()) {
+            if (stateTime > attackRight1Animation.getAnimationDuration()) {
                 attackState = Enums.AttackState.NOT_ATTACKING;
                 stateTime = 0f;
             }
@@ -237,20 +251,20 @@ public class Player {
             }
             switch (attackDirection) {
                 case LEFT:
-                    attackAnimation = attackHorizontal1Animation;
-                    currentFrame = attackHorizontal1Animation.getKeyFrame(stateTime, false);
+                    attackAnimation = useAttack1 ? attackLeft1Animation : attackLeft2Animation;
+                    currentFrame = attackAnimation.getKeyFrame(stateTime, false);
                     break;
                 case RIGHT:
-                    attackAnimation = attackHorizontal1Animation;
-                    currentFrame = attackHorizontal1Animation.getKeyFrame(stateTime, false);
+                    attackAnimation = useAttack1 ? attackRight1Animation : attackRight2Animation;
+                    currentFrame = attackAnimation.getKeyFrame(stateTime, false);
                     break;
                 case UP:
-                    attackAnimation = attackUp1Animation;
-                    currentFrame = attackUp1Animation.getKeyFrame(stateTime, false);
+                    attackAnimation = useAttack1 ? attackUp1Animation : attackUp2Animation;
+                    currentFrame = attackAnimation.getKeyFrame(stateTime, false);
                     break;
                 case DOWN:
-                    attackAnimation = attackDown1Animation;
-                    currentFrame = attackDown1Animation.getKeyFrame(stateTime, false);
+                    attackAnimation = useAttack1 ? attackDown1Animation : attackDown2Animation;
+                    currentFrame = attackAnimation.getKeyFrame(stateTime, false);
                     break;
             }
         } else {

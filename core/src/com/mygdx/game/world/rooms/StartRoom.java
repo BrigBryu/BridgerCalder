@@ -1,11 +1,13 @@
-package com.mygdx.game.world;
+package com.mygdx.game.world.rooms;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.util.Constants;
-import com.mygdx.game.world.rooms.Room;
 import com.mygdx.game.world.tiles.EntryTile;
 
 public class StartRoom extends Room {
+    /**
+     * The start cords for the player
+     */
     private int entryX, entryY;
 
     public StartRoom(int x, int y, int width, int height, Texture floorTexture, Texture wallTexture, Texture entryTexture) {
@@ -23,10 +25,18 @@ public class StartRoom extends Room {
         getTiles().add(new EntryTile(entryX * Constants.TILE_SIZE, entryY * Constants.TILE_SIZE, entryTexture));
     }
 
+    /**
+     * start cord x
+     * @return start x
+     */
     public int getEntryX() {
         return entryX;
     }
 
+    /**
+     * start cord y
+     * @return start y
+     */
     public int getEntryY() {
         return entryY;
     }

@@ -2,7 +2,6 @@ package com.mygdx.game.world;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.mygdx.game.entities.Player;
 import com.mygdx.game.entities.enemies.BasicEnemy;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
@@ -25,10 +24,13 @@ public class DungeonGenerator {
     private Map map;
     private int startX;
     private int startY;
+    private OrthographicCamera camera;
+
+    //Variables used for map generation
     private int minRoomWidth = 30;
     private int minRoomHeight = 30;
-    private int minRoomDistApart = 2;
-    private OrthographicCamera camera;
+    private int numRooms = 4;
+    private double hallReduction = 1.1;
 
     public DungeonGenerator(OrthographicCamera camera) {
         this.camera = camera;
@@ -68,7 +70,7 @@ public class DungeonGenerator {
     }
 
     private void initializeDungeon(int width, int height) {
-        // Initialization logic
+        // Initialization
     }
 
     private void generateRooms(Zone zone) {
@@ -79,8 +81,11 @@ public class DungeonGenerator {
         startX = ((StartRoom) startRoom).getEntryX();
         startY = ((StartRoom) startRoom).getEntryY();
 
-        // Generate subsequent rooms
-        for (int i = 1; i < 10; i++) {
+        int lastWidth = 0;
+        int lastHeight = 0;
+
+        // Generate other rooms
+        for (int i = 1; i < numRooms; i++) {
             Room newRoom = null;
             boolean roomPlaced = false;
 
@@ -89,6 +94,17 @@ public class DungeonGenerator {
                 Room baseRoom = rooms.get(rand.nextInt(rooms.size()));
                 int gapX = Constants.MIN_ROOM_GAP + rand.nextInt(Constants.MAX_ROOM_GAP - Constants.MIN_ROOM_GAP + 1);
                 int gapY = Constants.MIN_ROOM_GAP + rand.nextInt(Constants.MAX_ROOM_GAP - Constants.MIN_ROOM_GAP + 1);
+
+
+                //Try to reduce hall length
+                if(gapX > lastWidth){
+                    gapX = (int) (gapX * ((double) lastWidth / (gapX * hallReduction)));
+                }
+                if(gapY > lastHeight){
+                    //gapY *= (lastWidth - gapY);
+                    gapY = (int) (gapY * ((double) lastWidth / (gapY * hallReduction)));
+
+                }
 
                 // Determine new room position
                 int newX = baseRoom.getX() + baseRoom.getWidth() + gapX;
@@ -104,7 +120,12 @@ public class DungeonGenerator {
                         newX = baseRoom.getX() + gapX + rand.nextInt(5);
                     }
 
-                    newRoom = generateRoom(newX, newY);
+                    if(i < numRooms - 1){
+                        newRoom = generateRoom(newX, newY);
+                    } else {
+                        System.out.println("end room");
+                        newRoom = new EndRoom(newX, newY, 7, 7, floorTexture, wallTexture, entryTexture);
+                    }
 
                     // Check if the room intersects with any existing rooms
                     if (!intersectsAnyRoom(newRoom)) {
@@ -116,8 +137,14 @@ public class DungeonGenerator {
 
             if (newRoom != null) {
                 rooms.add(newRoom);
+                lastWidth = newRoom.getWidth();
+                lastHeight = newRoom.getHeight();
             }
         }
+
+
+
+
     }
 
     private Room generateRoom(int x, int y) {
@@ -346,3 +373,51 @@ public class DungeonGenerator {
         return enemies;
     }
 }
+
+
+
+//// Generate other rooms
+//int numRooms = 10;
+//        for (int i = 1; i < numRooms; i++) {
+//Room newRoom = null;
+//boolean roomPlaced = false;
+//
+//// Attempt to place the new room
+//            while (!roomPlaced) {
+//Room baseRoom = rooms.get(rand.nextInt(rooms.size()));
+//int gapX = Constants.MIN_ROOM_GAP + rand.nextInt(Constants.MAX_ROOM_GAP - Constants.MIN_ROOM_GAP + 1);
+//int gapY = Constants.MIN_ROOM_GAP + rand.nextInt(Constants.MAX_ROOM_GAP - Constants.MIN_ROOM_GAP + 1);
+//
+//// Determine new room position
+//int newX = baseRoom.getX() + baseRoom.getWidth() + gapX;
+//int newY = baseRoom.getY() + baseRoom.getHeight() + gapY;
+//
+//// Try placing the room at different positions around the base room
+//                for (int j = 0; j < 4; j++) {
+//        if (j == 1) {
+//newX = baseRoom.getX() - gapX - rand.nextInt(5);
+//                    } else if (j == 2) {
+//newY = baseRoom.getY() - gapY - rand.nextInt(5);
+//                    } else if (j == 3) {
+//newX = baseRoom.getX() + gapX + rand.nextInt(5);
+//                    }
+//
+//                            if(i < numRooms - 1){
+//newRoom = generateRoom(newX, newY);
+//                    } else {
+//                            System.out.println("end room");
+//newRoom = new EndRoom(newX, newY, 7, 7, floorTexture, wallTexture, entryTexture);
+//                    }
+//
+//                            // Check if the room intersects with any existing rooms
+//                            if (!intersectsAnyRoom(newRoom)) {
+//            roomPlaced = true;
+//        break;
+//        }
+//        }
+//        }
+//
+//        if (newRoom != null) {
+//        rooms.add(newRoom);
+//            }
+//                    }

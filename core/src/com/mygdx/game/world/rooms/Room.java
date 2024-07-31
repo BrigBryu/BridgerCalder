@@ -13,8 +13,12 @@ import java.util.List;
 public class Room {
     /**
      * Not in pixels but in tiles
+     * I think is at the bottom left of room
      */
     private int x, y;
+    /**
+     * Also not in pixles but in tiles
+     */
     private int  width, height;
     protected List<Tile> tiles;
     protected Texture floorTexture;
