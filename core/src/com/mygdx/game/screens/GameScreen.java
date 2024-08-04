@@ -19,7 +19,7 @@ import java.util.List;
 public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private SpriteBatch batch;
-    private MapRenderer mapRenderer;
+
     private Player player;
     private Map map;
     private List<Enemy> enemies;
@@ -29,8 +29,7 @@ public class GameScreen implements Screen {
         this.camera = camera;
         this.batch = new SpriteBatch();
         this.map = new Map();
-        this.map.initialize(); // Make sure to initialize the map
-        this.mapRenderer = new MapRenderer(map);
+        this.map.initialize();
         this.game = game;
         this.player = new Player(100, 100, camera); // Set initial position of the player
 
@@ -40,10 +39,7 @@ public class GameScreen implements Screen {
     }
 
     private void initializeEnemies() {
-        BasicEnemy enemy = new BasicEnemy(Constants.TILE_SIZE * 5, Constants.TILE_SIZE * 5, 100, camera);
-        enemies.add(enemy);
 
-        // Add more enemies as needed
     }
 
     @Override
@@ -63,7 +59,7 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
-        mapRenderer.render(batch);
+        map.render(batch);
         player.render(batch); // Render the player
         for (Enemy enemy : enemies) {
             enemy.render(batch, ((BasicEnemy) enemy).getDirection()); // Render each enemy with its direction

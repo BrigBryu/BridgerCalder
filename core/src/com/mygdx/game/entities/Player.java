@@ -180,7 +180,7 @@ public class Player {
         }
 
         // Handle attack input
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && attackState == Enums.AttackState.NOT_ATTACKING) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.J) && attackState == Enums.AttackState.NOT_ATTACKING) {
             attackState = Enums.AttackState.ATTACKING;
             attackDirection = direction;
             stateTime = 0f;

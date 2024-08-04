@@ -64,19 +64,28 @@ public class Room {
     public List<Tile> getTiles() {
         return tiles;
     }
-
+    /**
+     * in tiles
+     */
     public int getX() {
         return x;
     }
-
+    /**
+     * in tiles
+     */
     public int getY() {
         return y;
     }
-
+    /**
+     * in tiles
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * in tiles
+     */
     public int getHeight() {
         return height;
     }
@@ -103,6 +112,13 @@ public class Room {
                 this.getX() + this.getWidth() > tile.getX() &&
                 this.getY() < tile.getY() + tile.getHeight() &&
                 this.getY() + this.getHeight() > tile.getY();
+    }
+
+    public boolean intersects(int x, int y) {
+        return this.getX() < x  &&
+                this.getX() + this.getWidth() > x &&
+                this.getY() < y &&
+                this.getY() + this.getHeight() > y;
     }
 
     public boolean contains(int px, int py) {

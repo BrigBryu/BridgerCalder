@@ -2,14 +2,17 @@ package com.mygdx.game.world.rooms;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.HitBox;
 import com.mygdx.game.world.tiles.EntryTile;
 
 public class EndRoom extends Room {
     private int exitX, exitY;
+    private HitBox nextRoom;
 
     public EndRoom(int x, int y, int width, int height, Texture floorTexture, Texture wallTexture, Texture entryTexture) {
         super(x, y, width, height, floorTexture, wallTexture);
         addEntryTile(entryTexture);
+        nextRoom = new HitBox(exitX,exitY, Constants.TILE_SIZE, Constants.TILE_SIZE);
     }
 
     private void addEntryTile(Texture entryTexture) {

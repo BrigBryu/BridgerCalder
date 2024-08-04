@@ -13,7 +13,7 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.AssetManager;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.world.DungeonGenerator;
-import com.mygdx.game.world.MapRenderer;
+import com.mygdx.game.world.Map;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,8 @@ import java.util.List;
 public class DungeonScreen implements Screen {
     private OrthographicCamera camera;
     private SpriteBatch batch;
-    private MapRenderer mapRenderer;
+   // private MapRenderer mapRenderer;
+    private Map map;
     private Player player;
     private DungeonGenerator dungeonGenerator;
     private List<Enemy> enemies;
@@ -32,22 +33,17 @@ public class DungeonScreen implements Screen {
         this.camera = camera;
         this.batch = new SpriteBatch();
         this.dungeonGenerator = new DungeonGenerator(camera);
-        this.dungeonGenerator.generateDungeon(50, 50); // Example dimensions for the dungeon
-        this.mapRenderer = new MapRenderer(dungeonGenerator.getMap());
+        this.dungeonGenerator.generateDungeon();
+        this.map = dungeonGenerator.getMap();
+
         this.player = new Player(dungeonGenerator.getStartX() * Constants.TILE_SIZE, dungeonGenerator.getStartY() * Constants.TILE_SIZE, camera); // Set initial position of the player within the dungeon
 
         this.game = game;
-        // Initialize enemies
+
+        // Initialize for running
         enemies = new ArrayList<>(dungeonGenerator.getEnemies());
-        initializeEnemiesNotFromDungeonGenerator();
-    }
-
-    private void initializeEnemiesNotFromDungeonGenerator() {
-        BasicEnemy enemy = new BasicEnemy(Constants.TILE_SIZE * 5, Constants.TILE_SIZE * 5, 100, camera);
-        enemies.add(enemy);
-
-
-        // Add more enemies as needed
+        //Need to uncomment when want to test running on 2d map TODO
+        //map.setTileMap();
     }
 
     @Override
@@ -67,7 +63,8 @@ public class DungeonScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
-        mapRenderer.render(batch);
+        //mapRenderer.render(batch);
+        map.render(batch);
         player.render(batch); // Render the player
         for (Enemy enemy : enemies) {
             enemy.render(batch, ((BasicEnemy) enemy).getDirection()); // Render each enemy with its direction
@@ -84,6 +81,11 @@ public class DungeonScreen implements Screen {
 
     private void updatePlayer(float delta) {
         updatePlayerSpeed();
+        checkForHitBoxInteractions();
+    }
+
+    private void checkForHitBoxInteractions() {
+
     }
 
     private void checkUserInput(float delta) {
@@ -108,7 +110,8 @@ public class DungeonScreen implements Screen {
     public boolean isPlayerInRoom() {
         int playerX = (int) player.getHitbox().getX();
         int playerY = (int) player.getHitbox().getY();
-        return mapRenderer.getMap().isInRoom(playerX, playerY, dungeonGenerator.getRooms());
+       // return mapRenderer.getMap().isInRoom(playerX, playerY, dungeonGenerator.getRooms());
+        return map.isInRoom(playerX, playerY, dungeonGenerator.getRooms());
     }
 
     public void updatePlayerSpeed() {
@@ -127,6 +130,7 @@ public class DungeonScreen implements Screen {
 //        camera.viewportHeight = (float) (height * Constants.TILE_SIZE / 2) / 22;
 //        camera.update();
 //    }
+
 
     public void resize(int width, int height) {
         float aspectRatio = (float) width / height;

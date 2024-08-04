@@ -9,8 +9,8 @@ import com.mygdx.game.world.tiles.WallTile;
 import java.util.List;
 
 public class CircularRoom extends Room {
-    public CircularRoom(int x, int y, int width, int height, Texture floorTexture, Texture wallTexture) {
-        super(x, y, width, height, floorTexture, wallTexture);
+    public CircularRoom(int x, int y, int width, Texture floorTexture, Texture wallTexture) {
+        super(x, y, width, width, floorTexture, wallTexture);
         initializeTiles();
         surroundWithWalls();
     }

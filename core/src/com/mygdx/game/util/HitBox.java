@@ -36,6 +36,11 @@ public class HitBox {
     }
 
     // Getters and setters
+
+    /**
+     * in pixels not tile size
+     * @return x from bottom left
+     */
     public float getX() {
         return x;
     }
@@ -45,6 +50,10 @@ public class HitBox {
         this.bounds.setX(x);
     }
 
+    /**
+     * in pixels not tile size
+     * @return y from bottom left
+     */
     public float getY() {
         return y;
     }
