@@ -7,6 +7,13 @@ public class HitBox {
     protected float width, height;
     protected Rectangle bounds;
 
+    /**
+     * Make a hit box
+     * @param x in pixels not tiles
+     * @param y in pixels not tiles
+     * @param width in pixels not tiles
+     * @param height in pixels not tiles
+     */
     public HitBox(float x, float y, float width, float height) {
         this.x = x;
         this.y = y;
@@ -17,6 +24,10 @@ public class HitBox {
 
     public boolean overlaps(HitBox other) {
         return this.bounds.overlaps(other.getBounds());
+    }
+
+    public boolean overlaps(Rectangle otherRectangle) {
+        return this.bounds.overlaps(otherRectangle);
     }
 
     public Rectangle getBounds() {

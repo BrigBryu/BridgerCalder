@@ -10,41 +10,38 @@ import com.mygdx.game.entities.Player;
 import com.mygdx.game.entities.enemies.BasicEnemy;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
-import com.mygdx.game.world.Map;
-import com.mygdx.game.world.MapRenderer;
+import com.mygdx.game.world.TiledMapHandler;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameScreen implements Screen {
+public class TestScreen implements Screen {
     private OrthographicCamera camera;
     private SpriteBatch batch;
 
     private Player player;
-    private Map map;
+    private TiledMapHandler tiledMapHandler;
     private List<Enemy> enemies;
     private Boot game;
 
-    public GameScreen(OrthographicCamera camera, Boot game) {
+    public TestScreen(OrthographicCamera camera, Boot game) {
         this.camera = camera;
         this.batch = new SpriteBatch();
-        this.map = new Map();
-        this.map.initialize();
+        //TODO need an update
+        this.tiledMapHandler = new TiledMapHandler("map.tmx", camera);
         this.game = game;
-        this.player = new Player(100, 100, camera); // Set initial position of the player
+        this.player = new Player(100, 100, camera);
 
-        // Initialize enemies
         enemies = new ArrayList<>();
         initializeEnemies();
     }
 
     private void initializeEnemies() {
-
     }
 
     @Override
     public void show() {
-        // Ensure the viewport is set correctly when the screen is shown
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
@@ -52,17 +49,17 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         update(delta);
 
-        Gdx.gl.glClearColor(0, 0, 0, 1); // Clear the screen with a black color
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
-        map.render(batch);
-        player.render(batch); // Render the player
+        tiledMapHandler.render(batch);
+        player.render(batch);
         for (Enemy enemy : enemies) {
-            enemy.render(batch, ((BasicEnemy) enemy).getDirection()); // Render each enemy with its direction
+            enemy.render(batch, ((BasicEnemy) enemy).getDirection());
         }
         batch.end();
     }
@@ -74,7 +71,8 @@ public class GameScreen implements Screen {
     }
 
     private void checkUserInput(float delta) {
-        player.update(delta, map.getWallTiles(), enemies);
+        List<RectangleMapObject> collisionObjects = tiledMapHandler.getCollisionObjects();
+        player.updateTiled(delta, collisionObjects, enemies, null);
     }
 
     private void updateEnemies(float delta) {
@@ -111,9 +109,11 @@ public class GameScreen implements Screen {
     public void dispose() {
         batch.dispose();
         player.dispose();
-        map.dispose();
+        tiledMapHandler.dispose();
         for (Enemy enemy : enemies) {
             enemy.dispose();
         }
     }
 }
+
+

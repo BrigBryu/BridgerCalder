@@ -1,18 +1,24 @@
 package com.mygdx.game.world.rooms;
 
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.mygdx.game.Boot;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.HitBox;
+import com.mygdx.game.util.InteractiveHitBox;
+import com.mygdx.game.util.InteractiveHitBoxes.EndHitBox;
 import com.mygdx.game.world.tiles.EntryTile;
+
+import java.util.List;
 
 public class EndRoom extends Room {
     private int exitX, exitY;
-    private HitBox nextRoom;
+    private OrthographicCamera camera;
 
-    public EndRoom(int x, int y, int width, int height, Texture floorTexture, Texture wallTexture, Texture entryTexture) {
+    public EndRoom(int x, int y, int width, int height, Texture floorTexture, Texture wallTexture, Texture entryTexture, OrthographicCamera camera, Boot game) {
         super(x, y, width, height, floorTexture, wallTexture);
         addEntryTile(entryTexture);
-        nextRoom = new HitBox(exitX,exitY, Constants.TILE_SIZE, Constants.TILE_SIZE);
+        hitBoxes.add(new EndHitBox((exitX - 1) * Constants.TILE_SIZE - 1,(exitY- 1) * Constants.TILE_SIZE - 1, Constants.TILE_SIZE * 3 + 4, Constants.TILE_SIZE * 3 + 4,camera, game));
     }
 
     private void addEntryTile(Texture entryTexture) {

@@ -14,11 +14,13 @@ import com.mygdx.game.util.AssetManager;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.world.DungeonGenerator;
 import com.mygdx.game.world.Map;
+import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DungeonScreen implements Screen {
+    int print = 0;
     private OrthographicCamera camera;
     private SpriteBatch batch;
    // private MapRenderer mapRenderer;
@@ -32,9 +34,13 @@ public class DungeonScreen implements Screen {
     public DungeonScreen(OrthographicCamera camera, Boot game) {
         this.camera = camera;
         this.batch = new SpriteBatch();
-        this.dungeonGenerator = new DungeonGenerator(camera);
+        this.dungeonGenerator = new DungeonGenerator(camera, game);
         this.dungeonGenerator.generateDungeon();
         this.map = dungeonGenerator.getMap();
+        if(Constants.DRAW_HIT_BOXES) {
+            this.map.setCamera(camera);
+        }
+
 
         this.player = new Player(dungeonGenerator.getStartX() * Constants.TILE_SIZE, dungeonGenerator.getStartY() * Constants.TILE_SIZE, camera); // Set initial position of the player within the dungeon
 
@@ -43,7 +49,8 @@ public class DungeonScreen implements Screen {
         // Initialize for running
         enemies = new ArrayList<>(dungeonGenerator.getEnemies());
         //Need to uncomment when want to test running on 2d map TODO
-        //map.setTileMap();
+        map.setTileMap(dungeonGenerator.getRoomsExcludingStartRoom());
+        System.out.println(map.toString());
     }
 
     @Override
@@ -93,7 +100,32 @@ public class DungeonScreen implements Screen {
             game.setScreen(new MenuScreen(game));
             return;
         }
-        player.update(delta, dungeonGenerator.getMap().getWallTiles(), enemies);
+//        player.update(delta, dungeonGenerator.getMap().getWallTiles(), enemies);
+        print++;
+        if(print == 50) {
+            System.out.println("player x pixles " + player.getHitbox().getX());
+            System.out.println("player y pixles " + player.getHitbox().getX());
+
+            System.out.println("player x tiles " + (int) (player.getHitbox().getX() / Constants.TILE_SIZE));
+            System.out.println("player y tiles " + (int) (player.getHitbox().getX() / Constants.TILE_SIZE));
+        }
+
+        //Correctly has collisions
+        //List<WallTile> walls = map.getWallTiles((int) (player.getHitbox().getX() / Constants.TILE_SIZE) -  (4 * Constants.TILE_SIZE + 1), (int) (player.getHitbox().getY() / Constants.TILE_SIZE) -  (4 * Constants.TILE_SIZE + 1), 19, print == 50);
+        //Correct hit box
+        //List<WallTile> walls = map.getWallTiles((int) (player.getHitbox().getX()  / Constants.TILE_SIZE)  - (6), (int) (player.getHitbox().getY()  / Constants.TILE_SIZE) - (6), 12, print == 50);
+
+        int playerTileX = (int) (player.getHitbox().getX() / Constants.TILE_SIZE);
+        int playerTileY = (int) (player.getHitbox().getY() / Constants.TILE_SIZE);
+
+        List<WallTile> walls = map.getWallTiles(playerTileX - 3, playerTileY - 3, 7, print == 50);
+
+
+
+        if(print == 50) {
+             print = 0;
+        }
+        player.updateMap(delta, walls, enemies, map.getHitboxes());
     }
 
     private void updateEnemies(float delta) {
@@ -123,7 +155,6 @@ public class DungeonScreen implements Screen {
         }
     }
 
-    @Override
 //    public void resize(int width, int height) {
 //        // Adjust the camera viewport size based on the window size
 //        camera.viewportWidth = (float) (width * Constants.TILE_SIZE / 2) / 22; // should be based on tile size
@@ -131,7 +162,7 @@ public class DungeonScreen implements Screen {
 //        camera.update();
 //    }
 
-
+    @Override
     public void resize(int width, int height) {
         float aspectRatio = (float) width / height;
 

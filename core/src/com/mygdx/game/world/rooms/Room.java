@@ -3,6 +3,7 @@ package com.mygdx.game.world.rooms;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.InteractiveHitBox;
 import com.mygdx.game.world.tiles.FloorTile;
 import com.mygdx.game.world.tiles.Tile;
 import com.mygdx.game.world.tiles.WallTile;
@@ -23,6 +24,8 @@ public class Room {
     protected List<Tile> tiles;
     protected Texture floorTexture;
     protected Texture wallTexture;
+    protected List<InteractiveHitBox> hitBoxes;
+
 
     public Room(int x, int y, int width, int height, Texture floorTexture, Texture wallTexture) {
         this.x = x;
@@ -32,6 +35,7 @@ public class Room {
         this.floorTexture = floorTexture;
         this.wallTexture = wallTexture;
         tiles = new ArrayList<>();
+        hitBoxes = new ArrayList<>();
         initializeTiles();
     }
 
@@ -123,5 +127,9 @@ public class Room {
 
     public boolean contains(int px, int py) {
         return (px/ Constants.TILE_SIZE) >= x && (px/ Constants.TILE_SIZE) < x + width && (py/ Constants.TILE_SIZE) >= y && (py/ Constants.TILE_SIZE) < y + height;
+    }
+
+    public List<InteractiveHitBox> getHitBoxes(){
+        return hitBoxes;
     }
 }

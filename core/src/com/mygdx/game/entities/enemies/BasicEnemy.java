@@ -101,18 +101,87 @@ public class BasicEnemy extends Enemy {
         batch.draw(currentFrame, hitbox.getX() - (width - hitbox.getWidth()) / 2, hitbox.getY() - (height - hitbox.getHeight()) / 2, width, height);
     }
 
-//    @Override
-//    public void update(float delta) {
-//        move(delta);
-//        stateTime += delta;
-//    }
 
     @Override
     public void update(float delta) {
-        if (currentPath != null && !currentPath.isEmpty()) {
-            followPath(delta);
-        }
-        stateTime += delta;
+//        float oldX = hitbox.getX(), oldY = hitbox.getY();
+//        float distance = speed * delta;
+//
+//        switch (direction) {
+//            case RIGHT:
+//                hitbox.setX(hitbox.getX() + distance);
+//                if (hitbox.getX() >= maxX) {
+//                    hitbox.setX(maxX); // Correct overshooting
+//                    direction = Enums.Direction.DOWN; // Change direction
+//                }
+//                break;
+//            case DOWN:
+//                hitbox.setY(hitbox.getY() - distance);
+//                if (hitbox.getY() <= minY) {
+//                    hitbox.setY(minY); // Correct overshooting
+//                    direction = Enums.Direction.LEFT; // Change direction
+//                }
+//                break;
+//            case LEFT:
+//                hitbox.setX(hitbox.getX() - distance);
+//                if (hitbox.getX() <= minX) {
+//                    hitbox.setX(minX); // Correct overshooting
+//                    direction = Enums.Direction.UP; // Change direction
+//                }
+//                break;
+//            case UP:
+//                hitbox.setY(hitbox.getY() + distance);
+//                if (hitbox.getY() >= maxY) {
+//                    hitbox.setY(maxY); // Correct overshooting
+//                    direction = Enums.Direction.RIGHT; // Change direction
+//                }
+//                break;
+//        }
+//        distance = speed * delta;
+//
+//        // System.out.println("Moving " + direction + ": (" + oldX + ", " + oldY + ") -> (" + x + ", " + y + ")");
+//        switch (direction) {
+//            case RIGHT:
+//                hitbox.setX(hitbox.getX() + distance);
+//                if (hitbox.getX() >= maxX) {
+//                    hitbox.setX(maxX); // Correct overshooting
+//                    direction = Enums.Direction.DOWN; // Change direction
+//                    setCurrentAnimation(attackRightAnimation);
+//                } else {
+//                    setCurrentAnimation(walkRightAnimation);
+//                }
+//                break;
+//            case DOWN:
+//                hitbox.setY(hitbox.getY() - distance);
+//                if (hitbox.getY() <= minY) {
+//                    hitbox.setY(minY); // Correct overshooting
+//                    direction = Enums.Direction.LEFT; // Change direction
+//                    setCurrentAnimation(attackDownAnimation);
+//                } else {
+//                    setCurrentAnimation(walkRightAnimation);
+//                }
+//                break;
+//            case LEFT:
+//                hitbox.setX(hitbox.getX() - distance);
+//                if (hitbox.getX() <= minX) {
+//                    hitbox.setX(minX); // Correct overshooting
+//                    direction = Enums.Direction.UP; // Change direction
+//                    setCurrentAnimation(attackLeftAnimation);
+//                } else {
+//                    setCurrentAnimation(walkLeftAnimation);
+//                }
+//                break;
+//            case UP:
+//                hitbox.setY(hitbox.getY() + distance);
+//                if (hitbox.getY() >= maxY) {
+//                    hitbox.setY(maxY); // Correct overshooting
+//                    direction = Enums.Direction.RIGHT; // Change direction
+//                    setCurrentAnimation(attackUpAnimation);
+//                } else {
+//                    setCurrentAnimation(walkLeftAnimation);
+//                }
+//                break;
+//        }
     }
 
     /**
@@ -197,15 +266,84 @@ public class BasicEnemy extends Enemy {
 
     @Override
     public void move(float delta) {
-        /*
-        // Assuming startTile and goalTile are defined and map is your Tile[][] array
-        Tile startTile = map[(int) (getX() / Constants.TILE_SIZE)][(int) (getY() / Constants.TILE_SIZE)];
-        Tile goalTile = ...; // The player's tile or another target
+        float oldX = hitbox.getX(), oldY = hitbox.getY();
+        float distance = speed * delta;
 
-        setPath(aStarPathfinding(startTile, goalTile, map)); // Use A*
-        // or
-        // setPath(jumpPointSearch(startTile, goalTile, map)); // Use JPS
-         */
+        switch (direction) {
+            case RIGHT:
+                hitbox.setX(hitbox.getX() + distance);
+                if (hitbox.getX() >= maxX) {
+                    hitbox.setX(maxX); // Correct overshooting
+                    direction = Enums.Direction.DOWN; // Change direction
+                }
+                break;
+            case DOWN:
+                hitbox.setY(hitbox.getY() - distance);
+                if (hitbox.getY() <= minY) {
+                    hitbox.setY(minY); // Correct overshooting
+                    direction = Enums.Direction.LEFT; // Change direction
+                }
+                break;
+            case LEFT:
+                hitbox.setX(hitbox.getX() - distance);
+                if (hitbox.getX() <= minX) {
+                    hitbox.setX(minX); // Correct overshooting
+                    direction = Enums.Direction.UP; // Change direction
+                }
+                break;
+            case UP:
+                hitbox.setY(hitbox.getY() + distance);
+                if (hitbox.getY() >= maxY) {
+                    hitbox.setY(maxY); // Correct overshooting
+                    direction = Enums.Direction.RIGHT; // Change direction
+                }
+                break;
+        }
+        float distance1 = speed * delta;
+
+        // System.out.println("Moving " + direction + ": (" + oldX + ", " + oldY + ") -> (" + x + ", " + y + ")");
+        switch (direction) {
+            case RIGHT:
+                hitbox.setX(hitbox.getX() + distance1);
+                if (hitbox.getX() >= maxX) {
+                    hitbox.setX(maxX); // Correct overshooting
+                    direction = Enums.Direction.DOWN; // Change direction
+                    setCurrentAnimation(attackRightAnimation);
+                } else {
+                    setCurrentAnimation(walkRightAnimation);
+                }
+                break;
+            case DOWN:
+                hitbox.setY(hitbox.getY() - distance1);
+                if (hitbox.getY() <= minY) {
+                    hitbox.setY(minY); // Correct overshooting
+                    direction = Enums.Direction.LEFT; // Change direction
+                    setCurrentAnimation(attackDownAnimation);
+                } else {
+                    setCurrentAnimation(walkRightAnimation);
+                }
+                break;
+            case LEFT:
+                hitbox.setX(hitbox.getX() - distance1);
+                if (hitbox.getX() <= minX) {
+                    hitbox.setX(minX); // Correct overshooting
+                    direction = Enums.Direction.UP; // Change direction
+                    setCurrentAnimation(attackLeftAnimation);
+                } else {
+                    setCurrentAnimation(walkLeftAnimation);
+                }
+                break;
+            case UP:
+                hitbox.setY(hitbox.getY() + distance1);
+                if (hitbox.getY() >= maxY) {
+                    hitbox.setY(maxY); // Correct overshooting
+                    direction = Enums.Direction.RIGHT; // Change direction
+                    setCurrentAnimation(attackUpAnimation);
+                } else {
+                    setCurrentAnimation(walkLeftAnimation);
+                }
+                break;
+        }
     }
 
 }

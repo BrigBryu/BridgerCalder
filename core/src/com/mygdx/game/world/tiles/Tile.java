@@ -7,6 +7,7 @@ import com.mygdx.game.util.HitBox;
 
 public class Tile extends HitBox {
     protected Texture texture;
+    private boolean canSpawn = false;
 
     public Tile(float x, float y, float width, float height, Texture texture) {
         super(x, y, width, height);
@@ -28,5 +29,17 @@ public class Tile extends HitBox {
 
     public Texture getTexture() {
         return texture;
+    }
+
+    public boolean getCanSpawn(){
+        return canSpawn;
+    }
+
+    /**
+     * Used to set canSpawn if this tile is allowed to be considered for spawning
+     * @param canSpawnUpdate change of canSpawn
+     */
+    public void setCanSpawn(boolean canSpawnUpdate) {
+        this.canSpawn = canSpawnUpdate;
     }
 }

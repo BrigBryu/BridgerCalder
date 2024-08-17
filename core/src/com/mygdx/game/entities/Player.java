@@ -8,10 +8,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Enums;
 import com.mygdx.game.util.HitBox;
+import com.mygdx.game.util.InteractiveHitBox;
 import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.List;
@@ -117,11 +119,17 @@ public class Player {
         shapeRenderer = new ShapeRenderer();
     }
 
+    /**
+     * Make a Animation<TextureRegion>
+     * @param frames for animation
+     * @param frameDuration normally PLAYER_ANIMATION_SPEED but needs to be updated to change with speed
+     * @return animation
+     */
     private Animation<TextureRegion> createAnimation(TextureRegion[] frames, float frameDuration) {
         return new Animation<TextureRegion>(frameDuration, frames);
     }
 
-    public void update(float delta, List<WallTile> wallTiles, List<Enemy> enemies) {
+    public void updateMap(float delta, List<WallTile> wallTiles, List<Enemy> enemies, List<InteractiveHitBox> hitBoxes) {
         if (attackState != Enums.AttackState.ATTACKING) {
             float oldX = hitbox.getX(), oldY = hitbox.getY(); // Store old position to revert if collision occurs
             boolean isMoving = false;
@@ -165,10 +173,23 @@ public class Player {
 
             hitbox.setPosition(hitbox.getX(), hitbox.getY());
 
-            for (WallTile wallTile : wallTiles) {
-                if (hitbox.overlaps(wallTile)) {
-                    hitbox.setPosition(oldX, oldY);
-                    break;
+            //Check for intersections or actions to happen when moving
+            if(Constants.wallIntersectionsOn && wallTiles != null) {
+                for (WallTile wallTile : wallTiles) {
+                    if (hitbox.overlaps(wallTile)) {
+                        hitbox.setPosition(oldX, oldY);
+                        break;
+                    }
+                }
+            }
+
+
+            if(hitBoxes != null) {
+                for (InteractiveHitBox hitBox : hitBoxes) {
+                    if (hitBox.overlaps(this.hitbox)) {
+                        System.out.println("Doing interaction after overlaps return true");
+                        break;
+                    }
                 }
             }
 
@@ -199,6 +220,102 @@ public class Player {
             stateTime += delta;
         }
     }
+
+    //Takes no enemies because this update is for walking around peacul areay
+
+    /**
+     * @param delta pased time
+     * @param collisionObjects to check for collisions with and not move through they solid
+     * @param hitBoxes you walk into triggers the method in them could be open shop go off ship
+     */
+    public void updateTiled(float delta, List<RectangleMapObject> collisionObjects, List<Enemy> enemies, List<InteractiveHitBox> hitBoxes) {
+        if (attackState != Enums.AttackState.ATTACKING) {
+            float oldX = hitbox.getX(), oldY = hitbox.getY(); // Store old position to revert if collision occurs
+            boolean isMoving = false;
+
+            // Handle movement input
+            if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                hitbox.setY(hitbox.getY() + speed * delta);
+                direction = Enums.Direction.UP;
+                isMoving = true;
+            }
+
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                hitbox.setY(hitbox.getY() - speed * delta);
+                direction = Enums.Direction.DOWN;
+                isMoving = true;
+            }
+
+            hitbox.setPosition(hitbox.getX(), hitbox.getY());
+
+            for (RectangleMapObject rectangleObject : collisionObjects) { // changed
+                if (hitbox.overlaps(rectangleObject.getRectangle())) { // changed
+                    hitbox.setPosition(oldX, oldY);
+                    break;
+                }
+            }
+
+            oldX = hitbox.getX();
+            oldY = hitbox.getY();
+
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                hitbox.setX(hitbox.getX() - speed * delta);
+                direction = Enums.Direction.LEFT;
+                isMoving = true;
+            }
+
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                hitbox.setX(hitbox.getX() + speed * delta);
+                direction = Enums.Direction.RIGHT;
+                isMoving = true;
+            }
+
+            hitbox.setPosition(hitbox.getX(), hitbox.getY());
+
+            if (Constants.wallIntersectionsOn && collisionObjects != null) { // changed
+                for (RectangleMapObject rectangleObject : collisionObjects) { // changed
+                    if (hitbox.overlaps(rectangleObject.getRectangle())) { // changed
+                        hitbox.setPosition(oldX, oldY);
+                        break;
+                    }
+                }
+            }
+
+            if (hitBoxes != null) {
+                for (InteractiveHitBox hitBox : hitBoxes) {
+                    if (hitBox.overlaps(this.hitbox)) {
+                        System.out.println("Doing interaction after overlaps return true");
+                        break;
+                    }
+                }
+            }
+
+            if (isMoving) {
+                movementState = Enums.PlayerState.WALKING;
+            } else {
+                movementState = Enums.PlayerState.IDLE;
+            }
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.J) && attackState == Enums.AttackState.NOT_ATTACKING) {
+            attackState = Enums.AttackState.ATTACKING;
+            attackDirection = direction;
+            stateTime = 0f;
+            useAttack1 = !useAttack1;
+            activateAttackHitBox(enemies);
+        }
+
+        if (attackState == Enums.AttackState.ATTACKING) {
+            stateTime += delta;
+            if (stateTime > attackRight1Animation.getAnimationDuration()) {
+                attackState = Enums.AttackState.NOT_ATTACKING;
+                stateTime = 0f;
+            }
+        } else {
+            stateTime += delta;
+        }
+    }
+
 
     private void activateAttackHitBox(List<Enemy> enemies) {
         float hitboxX = hitbox.getX();
