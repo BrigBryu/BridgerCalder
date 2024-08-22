@@ -1,0 +1,35 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "maps/untitled.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "maps/untitled.tmx": {
+            "scale": 0.7536,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 158.57218683651803,
+                "y": 108.1475583864119
+            }
+        },
+        "tileSets/testTileSet.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "/Users/bridgerb/Documents/Games/BridgerCalder/assets/TiledMaps/tileSets",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "tileSets/testTileSet.tsx",
+        "maps/untitled.tmx"
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "tileSets/testTileSet.tsx",
+        "maps/untitled.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}

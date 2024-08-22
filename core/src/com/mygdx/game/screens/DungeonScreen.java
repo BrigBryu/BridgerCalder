@@ -55,7 +55,7 @@ public class DungeonScreen implements Screen {
 
     @Override
     public void show() {
-        // Ensure the viewport is set correctly when the screen is shown
+        // viewport is set correctly when the screen is shown
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
@@ -74,7 +74,7 @@ public class DungeonScreen implements Screen {
         map.render(batch);
         player.render(batch); // Render the player
         for (Enemy enemy : enemies) {
-            enemy.render(batch, ((BasicEnemy) enemy).getDirection()); // Render each enemy with its direction
+            enemy.render(batch, ((BasicEnemy) enemy).getDirection());
         }
         batch.end();
     }
@@ -88,11 +88,6 @@ public class DungeonScreen implements Screen {
 
     private void updatePlayer(float delta) {
         updatePlayerSpeed();
-        checkForHitBoxInteractions();
-    }
-
-    private void checkForHitBoxInteractions() {
-
     }
 
     private void checkUserInput(float delta) {
@@ -166,18 +161,14 @@ public class DungeonScreen implements Screen {
     public void resize(int width, int height) {
         float aspectRatio = (float) width / height;
 
-        //Stolen :)
+        //Stolen :) but fucked up
         if (aspectRatio >= 1.0f) {
             // Landscape orientation or square
             camera.viewportWidth = Constants.VIEWPORT_WIDTH;
             camera.viewportHeight = Constants.VIEWPORT_WIDTH / aspectRatio;
-        } else {
-            // Portrait orientation
-            camera.viewportWidth = Constants.VIEWPORT_HEIGHT * aspectRatio;
-            camera.viewportHeight = Constants.VIEWPORT_HEIGHT;
         }
 
-        // apply the changes
+        // apply the changes to the view (camera)
         camera.update();
     }
 

@@ -10,10 +10,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.mygdx.game.entities.enemies.Enemy;
-import com.mygdx.game.util.Constants;
-import com.mygdx.game.util.Enums;
-import com.mygdx.game.util.HitBox;
-import com.mygdx.game.util.InteractiveHitBox;
+import com.mygdx.game.util.*;
 import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.List;
@@ -61,11 +58,9 @@ public class Player {
         this.camera = camera;
         hitbox = new HitBox(x, y, Constants.TILE_SIZE * 0.8f, Constants.TILE_SIZE);
 
-        // Load the sprite sheet
         Texture spriteSheet = new Texture(Gdx.files.internal("fancyArt/player/Warrior_BlueUpdatedSizing.png"));
         TextureRegion[][] tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / 6, spriteSheet.getHeight() / 8);
 
-        // Use loops to assign frames to animations
         TextureRegion[] idleFrames = new TextureRegion[6];
         TextureRegion[] walkFrames = new TextureRegion[6];
         TextureRegion[] attackRight1Frames = new TextureRegion[6];
@@ -110,13 +105,13 @@ public class Player {
         movementState = Enums.PlayerState.IDLE;
         attackState = Enums.AttackState.NOT_ATTACKING;
 
-        // Initialize attack HitBoxes
         attackHitBoxLeft = new HitBox(x - Constants.TILE_SIZE, y, Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
         attackHitBoxRight = new HitBox(x + Constants.TILE_SIZE, y, Constants.TILE_SIZE, Constants.TILE_SIZE * 2);
         attackHitBoxUp = new HitBox(x, y + Constants.TILE_SIZE * 2, Constants.TILE_SIZE, Constants.TILE_SIZE);
         attackHitBoxDown = new HitBox(x, y - Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
 
         shapeRenderer = new ShapeRenderer();
+        this.speed = speedBase;
     }
 
     /**
@@ -134,7 +129,7 @@ public class Player {
             float oldX = hitbox.getX(), oldY = hitbox.getY(); // Store old position to revert if collision occurs
             boolean isMoving = false;
 
-            // Handle movement input
+            // movement
             if (Gdx.input.isKeyPressed(Input.Keys.W)) {
                 hitbox.setY(hitbox.getY() + speed * delta);
                 direction = Enums.Direction.UP;
@@ -200,7 +195,7 @@ public class Player {
             }
         }
 
-        // Handle attack input
+        // attack
         if (Gdx.input.isKeyJustPressed(Input.Keys.J) && attackState == Enums.AttackState.NOT_ATTACKING) {
             attackState = Enums.AttackState.ATTACKING;
             attackDirection = direction;
@@ -221,36 +216,41 @@ public class Player {
         }
     }
 
-    //Takes no enemies because this update is for walking around peacul areay
 
     /**
      * @param delta pased time
      * @param collisionObjects to check for collisions with and not move through they solid
      * @param hitBoxes you walk into triggers the method in them could be open shop go off ship
      */
-    public void updateTiled(float delta, List<RectangleMapObject> collisionObjects, List<Enemy> enemies, List<InteractiveHitBox> hitBoxes) {
+    public void updateTiled(float delta, List<RectangleMapObject> collisionObjects, List<Enemy> enemies, List<InteractiveRectangleMapObject> hitBoxes) {
+//        Gdx.app.log("PlayerUpdate", "Update called with delta: " + delta);
+//        Gdx.app.log("PlayerSpeed", "Current speed: " + speed);
         if (attackState != Enums.AttackState.ATTACKING) {
             float oldX = hitbox.getX(), oldY = hitbox.getY(); // Store old position to revert if collision occurs
             boolean isMoving = false;
 
-            // Handle movement input
+            // movement
             if (Gdx.input.isKeyPressed(Input.Keys.W)) {
                 hitbox.setY(hitbox.getY() + speed * delta);
                 direction = Enums.Direction.UP;
                 isMoving = true;
+//                Gdx.app.log("PlayerMove", "Moving UP");
             }
 
             if (Gdx.input.isKeyPressed(Input.Keys.S)) {
                 hitbox.setY(hitbox.getY() - speed * delta);
                 direction = Enums.Direction.DOWN;
                 isMoving = true;
+//                Gdx.app.log("PlayerMove", "Moving DOWN");
             }
 
             hitbox.setPosition(hitbox.getX(), hitbox.getY());
+//            Gdx.app.log("PlayerPosition", "Current Position - X: " + hitbox.getX() + " Y: " + hitbox.getY());
 
-            for (RectangleMapObject rectangleObject : collisionObjects) { // changed
+            for (RectangleMapObject rectangleObject : collisionObjects) { // changed from map
                 if (hitbox.overlaps(rectangleObject.getRectangle())) { // changed
                     hitbox.setPosition(oldX, oldY);
+//                    Gdx.app.log("Collision", "Collision detected, reverting position");
                     break;
                 }
             }
@@ -262,29 +262,34 @@ public class Player {
                 hitbox.setX(hitbox.getX() - speed * delta);
                 direction = Enums.Direction.LEFT;
                 isMoving = true;
+//                Gdx.app.log("PlayerMove", "Moving LEFT");
             }
 
             if (Gdx.input.isKeyPressed(Input.Keys.D)) {
                 hitbox.setX(hitbox.getX() + speed * delta);
                 direction = Enums.Direction.RIGHT;
                 isMoving = true;
+//                Gdx.app.log("PlayerMove", "Moving RIGHT");
             }
 
             hitbox.setPosition(hitbox.getX(), hitbox.getY());
+//            Gdx.app.log("PlayerPosition", "Current Position after horizontal move - X: " + hitbox.getX() + " Y: " + hitbox.getY());
 
-            if (Constants.wallIntersectionsOn && collisionObjects != null) { // changed
+            if (Constants.wallIntersectionsOn && collisionObjects != null) { // changed from map
                 for (RectangleMapObject rectangleObject : collisionObjects) { // changed
                     if (hitbox.overlaps(rectangleObject.getRectangle())) { // changed
                         hitbox.setPosition(oldX, oldY);
+//                        Gdx.app.log("Collision", "Collision detected during horizontal move, reverting position");
                         break;
                     }
                 }
             }
 
             if (hitBoxes != null) {
-                for (InteractiveHitBox hitBox : hitBoxes) {
-                    if (hitBox.overlaps(this.hitbox)) {
-                        System.out.println("Doing interaction after overlaps return true");
+                for (InteractiveRectangleMapObject rectangleObject : hitBoxes) {
+                    if (hitbox.overlaps(rectangleObject.getRectangle())) {
+//                        Gdx.app.log("Interaction", "Interaction triggered by overlap with interactive hitbox");
+                        rectangleObject.intersectionInteraction();
                         break;
                     }
                 }
@@ -295,6 +300,7 @@ public class Player {
             } else {
                 movementState = Enums.PlayerState.IDLE;
             }
+//            Gdx.app.log("PlayerState", "Movement State: " + movementState);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.J) && attackState == Enums.AttackState.NOT_ATTACKING) {
@@ -303,6 +309,7 @@ public class Player {
             stateTime = 0f;
             useAttack1 = !useAttack1;
             activateAttackHitBox(enemies);
+//            Gdx.app.log("Attack", "Attack started in direction: " + attackDirection);
         }
 
         if (attackState == Enums.AttackState.ATTACKING) {
@@ -310,6 +317,7 @@ public class Player {
             if (stateTime > attackRight1Animation.getAnimationDuration()) {
                 attackState = Enums.AttackState.NOT_ATTACKING;
                 stateTime = 0f;
+//                Gdx.app.log("Attack", "Attack finished");
             }
         } else {
             stateTime += delta;
@@ -320,7 +328,7 @@ public class Player {
     private void activateAttackHitBox(List<Enemy> enemies) {
         float hitboxX = hitbox.getX();
         float hitboxY = hitbox.getY();
-        float offset = Constants.TILE_SIZE * 1.5f; // Adjustable offset
+        float offset = Constants.TILE_SIZE * 1.5f;
 
         switch (attackDirection) {
             case LEFT:
@@ -336,6 +344,8 @@ public class Player {
                 attackHitBoxDown.set(hitboxX - offset / 2, hitboxY - offset * 1.5f, Constants.TILE_SIZE * 2, Constants.TILE_SIZE * 2);
                 break;
         }
+
+//        Gdx.app.log("AttackHitBox", "Activated attack hitbox in direction: " + attackDirection);
 
         for (Enemy enemy : enemies) {
             if ((attackDirection == Enums.Direction.LEFT && attackHitBoxLeft.overlaps(enemy.getHitbox())) ||

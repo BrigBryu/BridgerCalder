@@ -2,6 +2,7 @@ package com.mygdx.game.util;
 
 /**
  * Abstract class to be extended all interactive hit boxes that have a different job need to be unique subclasses
+ * Used when using map not tiled map
  */
 public abstract class InteractiveHitBox extends HitBox {
     /**

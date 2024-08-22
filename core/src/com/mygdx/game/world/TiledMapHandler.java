@@ -11,7 +11,10 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.Boot;
 import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.InteractiveRectangleMapObject;
+import com.mygdx.game.util.InteractiveRectangleMapObjects.EndRectangleMapObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +26,17 @@ public class TiledMapHandler implements Disposable {
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer mapRenderer;
     private OrthographicCamera camera;
+    private Boot game;
     private float unitScale;
     private List<RectangleMapObject> collisionObjects;
-    private List<RectangleMapObject> interactiveObjects;
+    private List<InteractiveRectangleMapObject> interactiveObjects;
 
 
-    public TiledMapHandler(String mapFilePath, OrthographicCamera camera) {
+    public TiledMapHandler(String mapFilePath, OrthographicCamera camera, Boot game) {
         this.tiledMap = new TmxMapLoader().load(mapFilePath);
-        this.unitScale = (float) 1 / Constants.TILE_SIZE;
+        this.unitScale = 1f;
         this.camera = camera;
+        this.game = game;
         this.mapRenderer = new OrthogonalTiledMapRenderer(tiledMap, unitScale);
         this.collisionObjects = new ArrayList<>();
         this.interactiveObjects = new ArrayList<>();
@@ -67,8 +72,8 @@ public class TiledMapHandler implements Disposable {
             MapObjects interactiveLayerObjects = interactiveLayer.getObjects();
             //Note must be rectangles
             for (RectangleMapObject rectangleObject : interactiveLayerObjects.getByType(RectangleMapObject.class)) {
-                if(rectangleObject.getName().equals("Start")) {
-                    interactiveObjects.add(rectangleObject);
+                if(rectangleObject.getName().equals("StartDungeon")) {
+                    interactiveObjects.add(new EndRectangleMapObject(rectangleObject, camera, game));
                 }
             }
         }
@@ -90,5 +95,9 @@ public class TiledMapHandler implements Disposable {
 
     public List<RectangleMapObject> getCollisionObjects() {
         return collisionObjects;
+    }
+
+    public List<InteractiveRectangleMapObject> getInteractiveObjects() {
+        return interactiveObjects;
     }
 }

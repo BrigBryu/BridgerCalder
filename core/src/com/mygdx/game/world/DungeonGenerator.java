@@ -493,7 +493,6 @@ public class DungeonGenerator {
 
     /**
      * Marks all tiles that can potentially spawn enemies using DFS.
-     * Ensures that every 2x2 tile region is checked for spawnability.
      * For maze rooms, all floor tiles are marked as spawnable.
      */
     public void markSpawnableTiles() {
@@ -527,22 +526,20 @@ public class DungeonGenerator {
     }
 
     /**
-     * DFS method to mark tiles as spawnable.
-     * Checks each 2x2 area for spawnability and handles overlaps.
+     * Checks each 2x2 area for spawnable.
      *
-     * @param x The x-coordinate of the current tile in tiles.
-     * @param y The y-coordinate of the current tile in tiles.
+     * @param x current tile in tiles.
+     * @param y current tile in tiles.
      */
     private void dfsMarkTiles(int x, int y) {
-        // Fetch the current tile
         Tile currentTile = tileAt(x * Constants.TILE_SIZE, y * Constants.TILE_SIZE);
 
-        // Ensure the tile is within bounds and not already marked as spawnable
+        // base case
         if (currentTile == null || currentTile.getCanSpawn()) {
             return;
         }
 
-        // Check if the current 2x2 area is spawnable and mark tiles accordingly
+        // Check if the current 2x2 area is spawnable and mark
         if (is2x2OpenArea(x, y)) {
             mark2x2Area(x, y);
         }
@@ -550,7 +547,7 @@ public class DungeonGenerator {
         // Mark the current tile as visited by setting canSpawn to true
         currentTile.setCanSpawn(true);
 
-        // Continue DFS in all directions, including overlapping checks
+        // recurse all direction
         dfsMarkTiles(x + 1, y);  // Right
         dfsMarkTiles(x - 1, y);  // Left
         dfsMarkTiles(x, y + 1);  // Up
@@ -560,8 +557,8 @@ public class DungeonGenerator {
     /**
      * Checks if the 2x2 area starting at (x, y) is open and spawnable.
      *
-     * @param x The x-coordinate of the top-left tile of the 2x2 area in tiles.
-     * @param y The y-coordinate of the top-left tile of the 2x2 area in tiles.
+     * @param x top left tile of the 2x2 area in tiles.
+     * @param y top left tile of the 2x2 area in tiles.
      * @return true if the area is open and spawnable, false otherwise.
      */
     private boolean is2x2OpenArea(int x, int y) {
@@ -587,7 +584,9 @@ public class DungeonGenerator {
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
                 Tile tile = tileAt((x + i) * Constants.TILE_SIZE, (y + j) * Constants.TILE_SIZE);
-                tile.setCanSpawn(true);
+                if(tile != null) {
+                    tile.setCanSpawn(true);
+                }
             }
         }
     }

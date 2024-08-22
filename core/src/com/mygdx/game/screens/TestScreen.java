@@ -5,11 +5,13 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Boot;
 import com.mygdx.game.entities.Player;
 import com.mygdx.game.entities.enemies.BasicEnemy;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.InteractiveRectangleMapObject;
 import com.mygdx.game.world.TiledMapHandler;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 
@@ -19,8 +21,10 @@ import java.util.List;
 public class TestScreen implements Screen {
     private OrthographicCamera camera;
     private SpriteBatch batch;
+    private ShapeRenderer shapeRenderer;
 
     private Player player;
+    private List<InteractiveRectangleMapObject> interactiveObjects;
     private TiledMapHandler tiledMapHandler;
     private List<Enemy> enemies;
     private Boot game;
@@ -28,11 +32,12 @@ public class TestScreen implements Screen {
     public TestScreen(OrthographicCamera camera, Boot game) {
         this.camera = camera;
         this.batch = new SpriteBatch();
+        this.shapeRenderer = new ShapeRenderer();
         //TODO need an update
-        this.tiledMapHandler = new TiledMapHandler("map.tmx", camera);
+        this.tiledMapHandler = new TiledMapHandler("TiledMaps/maps/untitled.tmx", camera, game);
         this.game = game;
         this.player = new Player(100, 100, camera);
-
+        this.interactiveObjects = tiledMapHandler.getInteractiveObjects();
         enemies = new ArrayList<>();
         initializeEnemies();
     }
@@ -62,6 +67,10 @@ public class TestScreen implements Screen {
             enemy.render(batch, ((BasicEnemy) enemy).getDirection());
         }
         batch.end();
+
+        if(Constants.DRAW_HIT_BOXES) {
+            renderInteractiveAndCollisionObjects();
+        }
     }
 
     private void update(float delta) {
@@ -72,7 +81,7 @@ public class TestScreen implements Screen {
 
     private void checkUserInput(float delta) {
         List<RectangleMapObject> collisionObjects = tiledMapHandler.getCollisionObjects();
-        player.updateTiled(delta, collisionObjects, enemies, null);
+        player.updateTiled(delta, collisionObjects, enemies, interactiveObjects);
     }
 
     private void updateEnemies(float delta) {
@@ -96,6 +105,27 @@ public class TestScreen implements Screen {
         camera.update();
     }
 
+    private void renderInteractiveAndCollisionObjects() {
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        // Render Collision Objects
+        shapeRenderer.setColor(1, 0, 0, 1);
+        for (RectangleMapObject collisionObject : tiledMapHandler.getCollisionObjects()) {
+            shapeRenderer.rect(collisionObject.getRectangle().getX(), collisionObject.getRectangle().getY(),
+                    collisionObject.getRectangle().getWidth(), collisionObject.getRectangle().getHeight());
+        }
+
+        // Render Interactive Objects
+        shapeRenderer.setColor(0, 1, 0, 1);
+        for (InteractiveRectangleMapObject interactiveObject : interactiveObjects) {
+            shapeRenderer.rect(interactiveObject.getRectangle().getX(), interactiveObject.getRectangle().getY(),
+                    interactiveObject.getRectangle().getWidth(), interactiveObject.getRectangle().getHeight());
+        }
+
+        shapeRenderer.end();
+    }
+
     @Override
     public void pause() {}
 
@@ -110,6 +140,7 @@ public class TestScreen implements Screen {
         batch.dispose();
         player.dispose();
         tiledMapHandler.dispose();
+        shapeRenderer.dispose();
         for (Enemy enemy : enemies) {
             enemy.dispose();
         }
