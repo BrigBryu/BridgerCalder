@@ -7,7 +7,6 @@ import com.mygdx.game.entities.enemies.BasicEnemy;
 import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.HitBox;
-import com.mygdx.game.util.Zone;
 import com.mygdx.game.world.rooms.*;
 import com.mygdx.game.world.tiles.FloorTile;
 import com.mygdx.game.world.tiles.HallwayTile;
@@ -30,7 +29,7 @@ public class DungeonGenerator {
 
     private Texture floorTexture, wallTexture, hallwayTexture, entryTexture;
     private Random rand;
-    private Map map;
+    private GameMap map;
     private int startX;
     private int startY;
     private OrthographicCamera camera;
@@ -40,15 +39,15 @@ public class DungeonGenerator {
     /**
      * Both width and height should not be under 4 because hallways can merge together creating holes
      */
-    private int minRoomWidth = 10;
+    private int minRoomWidth = 20;
     /**
      * Both width and height should not be under 4 because hallways can merge together creating holes
      */
-    private int minRoomHeight = 10;
+    private int minRoomHeight = 20;
     /**
      * Must be greater than or equal to 3 otherwise generateHallways throws IndexOutOfBoundsException
      */
-    private int numRooms = 4;
+    private int numRooms = 3;
     /**
      * Is the number of rooms from the last that are considered for baseRoom when generating.
      * The index of that room is numberOfRooms - rand.nextInt(closerEndChance)
@@ -72,7 +71,7 @@ public class DungeonGenerator {
         wallTexture = new Texture("testWall.png");
         hallwayTexture = new Texture("testHallway.png");
         entryTexture = new Texture("testSafe.png");
-        map = new Map();
+        map = new GameMap();
         enemies = new ArrayList<>();
         this.game = game;
     }
@@ -98,6 +97,8 @@ public class DungeonGenerator {
 
         // Populate the map again with hallways to ensure they can override room tiles if necessary
         populateMapWithHallways();
+
+        markSpawnableTiles();
 
         placeEnemies();
 
@@ -211,17 +212,20 @@ public class DungeonGenerator {
         int roomWidth = minRoomWidth + rand.nextInt(minRoomWidth);
         int roomHeight = minRoomHeight + rand.nextInt(minRoomHeight);
         int roomType = rand.nextInt(4);
-        if(roomType == 0){
-            return new ClusteredRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
-        } else if (roomType == 1) {
-            return new MazeRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
-        } else if (roomType == 2) {
-            return new NaturalRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+        //TODO
+        return new NaturalRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
-        } else if (roomType == 3) {
-            return new CircularRoom(x, y, roomWidth, floorTexture, wallTexture);
-        }
-        return new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+//        if(roomType == 0){
+//            return new ClusteredRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+//        } else if (roomType == 1) {
+//            return new MazeRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+//        } else if (roomType == 2) {
+//            return new NaturalRoom(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
+//
+//        } else if (roomType == 3) {
+//            return new CircularRoom(x, y, roomWidth, floorTexture, wallTexture);
+//        }
+//        return new Room(x, y, roomWidth, roomHeight, floorTexture, wallTexture);
 
     }
 
@@ -472,7 +476,7 @@ public class DungeonGenerator {
     }
 
     private void populateMap() {
-        // Add all the tiles from the rooms to the map
+        // Add all the tiles from the both room types to the map
         for (Room room : generalRooms) {
             for (Tile tile : room.getTiles()) {
                 map.addTile(tile);
@@ -492,144 +496,75 @@ public class DungeonGenerator {
     }
 
     /**
-     * Marks all tiles that can potentially spawn enemies using DFS.
-     * For maze rooms, all floor tiles are marked as spawnable.
+     * Marks all tiles that can potentially spawn enemies.
      */
     public void markSpawnableTiles() {
-        // Iterate through all rooms
-        for (Room room : getRooms()) {
-            if (room instanceof MazeRoom) {
-                // Mark all floor tiles in maze rooms as spawnable
-                markAllFloorTilesAsSpawnable(room);
-            } else {
-                // Perform DFS for other rooms starting from hallway tiles
-                for (Tile hallwayTile : hallwayTiles) {
-                    int startX = (int) hallwayTile.getX() / Constants.TILE_SIZE;
-                    int startY = (int) hallwayTile.getY() / Constants.TILE_SIZE;
-                    dfsMarkTiles(startX, startY);
-                }
-            }
-        }
-    }
-
-    /**
-     * Marks all floor tiles in the given room as spawnable.
-     *
-     * @param room The room whose floor tiles should be marked as spawnable.
-     */
-    private void markAllFloorTilesAsSpawnable(Room room) {
-        for (Tile tile : room.getTiles()) {
-            if (tile instanceof FloorTile) {
-                tile.setCanSpawn(true);
-            }
-        }
-    }
-
-    /**
-     * Checks each 2x2 area for spawnable.
-     *
-     * @param x current tile in tiles.
-     * @param y current tile in tiles.
-     */
-    private void dfsMarkTiles(int x, int y) {
-        Tile currentTile = tileAt(x * Constants.TILE_SIZE, y * Constants.TILE_SIZE);
-
-        // base case
-        if (currentTile == null || currentTile.getCanSpawn()) {
-            return;
-        }
-
-        // Check if the current 2x2 area is spawnable and mark
-        if (is2x2OpenArea(x, y)) {
-            mark2x2Area(x, y);
-        }
-
-        // Mark the current tile as visited by setting canSpawn to true
-        currentTile.setCanSpawn(true);
-
-        // recurse all direction
-        dfsMarkTiles(x + 1, y);  // Right
-        dfsMarkTiles(x - 1, y);  // Left
-        dfsMarkTiles(x, y + 1);  // Up
-        dfsMarkTiles(x, y - 1);  // Down
-    }
-
-    /**
-     * Checks if the 2x2 area starting at (x, y) is open and spawnable.
-     *
-     * @param x top left tile of the 2x2 area in tiles.
-     * @param y top left tile of the 2x2 area in tiles.
-     * @return true if the area is open and spawnable, false otherwise.
-     */
-    private boolean is2x2OpenArea(int x, int y) {
-        // Check the 2x2 area for open, spawnable space
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 2; j++) {
-                Tile tile = tileAt((x + i) * Constants.TILE_SIZE, (y + j) * Constants.TILE_SIZE);
-                if (!(tile instanceof FloorTile) || tile.getCanSpawn()) {
-                    return false; // If not a floor tile or already marked as spawnable
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Marks all tiles in a 2x2 area starting at (x, y) as spawnable.
-     *
-     * @param x The x-coordinate of the top-left tile of the 2x2 area in tiles.
-     * @param y The y-coordinate of the top-left tile of the 2x2 area in tiles.
-     */
-    private void mark2x2Area(int x, int y) {
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 2; j++) {
-                Tile tile = tileAt((x + i) * Constants.TILE_SIZE, (y + j) * Constants.TILE_SIZE);
-                if(tile != null) {
+        for (Room room : generalRooms) {
+            for (Tile tile : room.getTiles()) {
+                if (tile instanceof FloorTile) {
                     tile.setCanSpawn(true);
                 }
             }
         }
     }
 
-
     private void placeEnemies() {
-        List<int[]> potentialPositions = new ArrayList<>();
+        List<Tile> spawnableTiles = new ArrayList<>();
 
-        // Identify potential positions adjacent to hallways
-        for (Tile hallwayTile : hallwayTiles) {
-            int xTiles = (int) hallwayTile.getX()/Constants.TILE_SIZE;
-            int yTiles = (int) hallwayTile.getY()/Constants.TILE_SIZE;
-            Tile potentialTile = tileAt(xTiles * Constants.TILE_SIZE,yTiles * Constants.TILE_SIZE);
-            if(intersectsGeneralRoom(xTiles, yTiles)
-                    && !intersectsSpecialRoom(xTiles, yTiles)
-                    && (potentialTile instanceof FloorTile)
-            ){
-
-
-                int x = (int) (hallwayTile.getX() / Constants.TILE_SIZE);
-                int y = (int) (hallwayTile.getY() / Constants.TILE_SIZE);
-
-                // Check adjacent positions
-                checkAndAddPosition(potentialPositions, x + 1, y);
-                checkAndAddPosition(potentialPositions, x - 1, y);
-                checkAndAddPosition(potentialPositions, x, y + 1);
-                checkAndAddPosition(potentialPositions, x, y - 1);
+        // use tiles that are  spawnable in general rooms only
+        for (Room room : generalRooms) {
+            for (Tile tile : room.getTiles()) {
+                if (tile.getCanSpawn() && tile instanceof FloorTile) {
+                    spawnableTiles.add(tile);
+                }
             }
         }
 
-        // Randomly select positions to place enemies
-        int numEnemies = 100; // Adjust the number of enemies as needed
-        for (int i = 0; i < numEnemies && !potentialPositions.isEmpty(); i++) {
-            int index = rand.nextInt(potentialPositions.size());
-            int[] position = potentialPositions.remove(index);
-            float x = position[0] * Constants.TILE_SIZE;
-            float y = position[1] * Constants.TILE_SIZE;
+        //TODO can change
+        int numEnemies = spawnableTiles.size() / 15;
+        for (int i = 0; i < numEnemies && !spawnableTiles.isEmpty(); i++) {
+            int index = rand.nextInt(spawnableTiles.size());
+            Tile spawnTile = spawnableTiles.remove(index);
+            float x = spawnTile.getX();
+            float y = spawnTile.getY();
 
-            // Create and add the enemy
-            BasicEnemy enemy = new BasicEnemy(x, y, 100, camera); // Adjust enemy parameters as needed
-            enemies.add(enemy);
+            BasicEnemy enemy = new BasicEnemy(x, y, 100, camera, map);
+
+            if (!isIntersectingWall(enemy.getHitBox()) && !isIntersectingHall(enemy.getHitBox())) {
+                enemies.add(enemy);
+            }
         }
     }
+
+    private boolean isIntersectingHall(HitBox enemyHitBox) {
+        for (Room room : getRooms()) {
+            for (Tile tile : room.getTiles()) {
+                if (tile instanceof HallwayTile) {
+                    HitBox hallHitBox = new HitBox(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
+                    if (enemyHitBox.overlaps(hallHitBox)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isIntersectingWall(HitBox enemyHitBox) {
+        for (Room room : getRooms()) {
+            for (Tile tile : room.getTiles()) {
+                if (tile instanceof WallTile) {
+                    HitBox wallHitBox = new HitBox(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
+                    if (enemyHitBox.overlaps(wallHitBox)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
 
     private void validateEnemyPositions() {
         for (Enemy enemy : enemies) {
@@ -708,7 +643,7 @@ public class DungeonGenerator {
         return false;
     }
 
-    public Map getMap() {
+    public GameMap getMap() {
         return map;
     }
 

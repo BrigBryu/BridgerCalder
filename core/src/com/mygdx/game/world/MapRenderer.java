@@ -3,9 +3,9 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class MapRenderer {
-    private Map map;
+    private GameMap map;
 
-    public MapRenderer(Map map) {
+    public MapRenderer(GameMap map) {
         this.map = map;
     }
 
@@ -13,7 +13,7 @@ public class MapRenderer {
         map.render(batch);
     }
 
-    public Map getMap(){
+    public GameMap getMap(){
         return map;
     }
 }

@@ -86,7 +86,7 @@ public class TestScreen implements Screen {
 
     private void updateEnemies(float delta) {
         for (Enemy enemy : enemies) {
-            enemy.update(delta);
+            enemy.update(delta, player);
         }
     }
 

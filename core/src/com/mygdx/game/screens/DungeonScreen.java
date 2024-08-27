@@ -13,7 +13,7 @@ import com.mygdx.game.entities.enemies.Enemy;
 import com.mygdx.game.util.AssetManager;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.world.DungeonGenerator;
-import com.mygdx.game.world.Map;
+import com.mygdx.game.world.GameMap;
 import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class DungeonScreen implements Screen {
     private OrthographicCamera camera;
     private SpriteBatch batch;
    // private MapRenderer mapRenderer;
-    private Map map;
+    private GameMap map;
     private Player player;
     private DungeonGenerator dungeonGenerator;
     private List<Enemy> enemies;
@@ -120,12 +120,15 @@ public class DungeonScreen implements Screen {
         if(print == 50) {
              print = 0;
         }
-        player.updateMap(delta, walls, enemies, map.getHitboxes());
+        int death = player.updateMap(delta, walls, enemies, map.getHitboxes());
+        if(death == -1) {
+            game.setScreen(new TestScreen(camera,game));
+        }
     }
 
     private void updateEnemies(float delta) {
         for (Enemy enemy : enemies) {
-            enemy.update(delta);
+            enemy.update(delta, player);
         }
     }
 
@@ -157,18 +160,14 @@ public class DungeonScreen implements Screen {
 //        camera.update();
 //    }
 
+
     @Override
     public void resize(int width, int height) {
-        float aspectRatio = (float) width / height;
-
-        //Stolen :) but fucked up
-        if (aspectRatio >= 1.0f) {
-            // Landscape orientation or square
-            camera.viewportWidth = Constants.VIEWPORT_WIDTH;
-            camera.viewportHeight = Constants.VIEWPORT_WIDTH / aspectRatio;
-        }
-
-        // apply the changes to the view (camera)
+        // Adjust the camera viewport size based on the window size
+        camera.viewportWidth = (float) (width * Constants.TILE_SIZE/2) / 22; // should be based on tile size is fucked up
+        camera.viewportHeight = (float) (height * Constants.TILE_SIZE/2) / 22;
+//        camera.viewportWidth = (float) (width * 1.2); // should be based on tile size is fucked up
+//        camera.viewportHeight = (float) (height * 1.5);
         camera.update();
     }
 

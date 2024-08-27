@@ -2,20 +2,20 @@ package com.mygdx.game.entities.enemies;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.mygdx.game.entities.Player;
 import com.mygdx.game.util.AssetManager;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Enums;
 import com.mygdx.game.util.HitBox;
+import com.mygdx.game.world.GameMap;
 import com.mygdx.game.world.tiles.Tile;
 import com.mygdx.game.world.tiles.WallTile;
 
 import java.util.*;
-
 
 public abstract class Enemy {
     protected float health;
@@ -35,13 +35,17 @@ public abstract class Enemy {
     protected HitBox hitbox;
     private ShapeRenderer shapeRenderer; // Renderer for drawing hitboxes
     private Camera camera;
+    protected GameMap map;
 
-    public Enemy(float x, float y, float width, float height, float health, Camera camera) {
+    protected float bodyDamage = 10;
+
+    public Enemy(float x, float y, float width, float height, float health, Camera camera, GameMap map) {
         this.hitbox = new HitBox(x, y, width, height);
         this.health = health;
         this.stateTime = 0f;
         this.shapeRenderer = new ShapeRenderer();
         this.camera = camera;
+        this.map = map;
         loadAnimations();
     }
 
@@ -175,10 +179,6 @@ public abstract class Enemy {
         return direction;
     }
 
-    public HitBox getHitbox(){
-        return hitbox;
-    }
-
     public float getX() {
         return hitbox.getX();
     }
@@ -189,9 +189,9 @@ public abstract class Enemy {
 
 
 
-    public abstract void move(float delta);
+    public abstract void move(float delta, Player player);
 
-    public abstract void update(float delta);
+    public abstract void update(float delta, Player player);
 
     protected abstract void loadAnimations();
 
@@ -344,6 +344,19 @@ public abstract class Enemy {
         }
 
         return jump(direction, new Tile(direction.getX() + (direction.getX() - current.getX()), direction.getY() + (direction.getY() - current.getY()), direction.getTexture()), goal, map);
+    }
+
+    /**
+     * returns the damage done to player if the player walks into the enemy
+     *
+     * @return damage to do to the player
+     */
+    public float getBodyDamage() {
+        return bodyDamage;
+    }
+
+    public HitBox getHitBox() {
+        return hitbox;
     }
 
     /**

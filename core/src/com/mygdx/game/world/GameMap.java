@@ -1,6 +1,5 @@
 package com.mygdx.game.world;
 
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -21,7 +20,7 @@ import java.util.Set;
 
 import static com.mygdx.game.util.Constants.wallIntersectionsOn;
 
-public class Map {
+public class GameMap {
 
 
 
@@ -49,7 +48,7 @@ public class Map {
     protected OrthographicCamera camera;
     private boolean cameraSet = false;
 
-    public Map() {
+    public GameMap() {
         tiles = new ArrayList<>();
         wallTiles = new ArrayList<>();
         tileMap = new Tile[0][0];
@@ -421,6 +420,19 @@ public class Map {
             r.append("\n");
         }
         return r.toString();
+    }
+
+    public Tile[][] getTileMap(){
+        return tileMap;
+    }
+
+
+    public Tile getTileAt(float x, float y) {
+        if(x < tileMap.length && x >= 0 && y < tileMap[0].length && y >=0) {
+            return tileMap[((int)x)][((int)y)];
+        } else {
+            return null;
+        }
     }
 
 }

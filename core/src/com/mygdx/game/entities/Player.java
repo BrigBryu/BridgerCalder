@@ -40,6 +40,22 @@ public class Player {
     private float speed = 0;
     private float speedBase = 350;
     private float speedOutOfHall = (float) (speedBase * 2);
+    private float playerHealth = 100f;
+    private float maxPlayerHealth = 100f;
+
+    private boolean isInvincible = false;
+    /**
+     * Seconds of invincibility after being hit
+     */
+    private float invincibilityDuration = 1.0f;
+    private float invincibilityTimer = 0f;
+
+    private float previousHealth;
+    private float displayDamageTime = 0;
+    private static final float DAMAGE_DISPLAY_DURATION = 0.5f;  // Duration to display the damage bar
+
+
+
 
     private HitBox hitbox;
     private float playerBodyTextureWidth = Constants.TILE_SIZE;
@@ -124,7 +140,25 @@ public class Player {
         return new Animation<TextureRegion>(frameDuration, frames);
     }
 
-    public void updateMap(float delta, List<WallTile> wallTiles, List<Enemy> enemies, List<InteractiveHitBox> hitBoxes) {
+    /**
+     * updates the player
+     * @param delta time passed
+     * @param wallTiles which are need to be treated as solid
+     * @param enemies to attack and receive damage from
+     * @param hitBoxes to intersect with and trigger interaction
+     * @return -1 if the player dies and 0 otherwisebatch.end();
+     *     drawPlayerHealthBar(); // Render the player's health bar
+     *     batch.begin();
+     */
+    public int updateMap(float delta, List<WallTile> wallTiles, List<Enemy> enemies, List<InteractiveHitBox> hitBoxes) {
+        if (isInvincible) {
+            invincibilityTimer += delta;
+            if (invincibilityTimer >= invincibilityDuration) {
+                isInvincible = false;
+                invincibilityTimer = 0f;
+            }
+        }
+
         if (attackState != Enums.AttackState.ATTACKING) {
             float oldX = hitbox.getX(), oldY = hitbox.getY(); // Store old position to revert if collision occurs
             boolean isMoving = false;
@@ -214,6 +248,27 @@ public class Player {
         } else {
             stateTime += delta;
         }
+
+        if(Constants.PERM_INVINCIBLE) {
+            //Take damage
+            if (!isInvincible) {
+                for (Enemy enemy : enemies) {
+                    if (hitbox.overlaps(enemy.getHitBox())) {
+                        previousHealth = playerHealth;
+                        playerHealth -= enemy.getBodyDamage();
+                        isInvincible = true;
+                        displayDamageTime = DAMAGE_DISPLAY_DURATION;
+                        if (playerHealth <= 0) {
+                            playerHealth = 0;
+                            System.out.println("Player has reached 0 health");
+                            return -1; // Player dies
+                        }
+                    }
+                }
+            }
+        }
+
+        return 0;
     }
 
 
@@ -324,7 +379,6 @@ public class Player {
         }
     }
 
-
     private void activateAttackHitBox(List<Enemy> enemies) {
         float hitboxX = hitbox.getX();
         float hitboxY = hitbox.getY();
@@ -348,10 +402,10 @@ public class Player {
 //        Gdx.app.log("AttackHitBox", "Activated attack hitbox in direction: " + attackDirection);
 
         for (Enemy enemy : enemies) {
-            if ((attackDirection == Enums.Direction.LEFT && attackHitBoxLeft.overlaps(enemy.getHitbox())) ||
-                    (attackDirection == Enums.Direction.RIGHT && attackHitBoxRight.overlaps(enemy.getHitbox())) ||
-                    (attackDirection == Enums.Direction.UP && attackHitBoxUp.overlaps(enemy.getHitbox())) ||
-                    (attackDirection == Enums.Direction.DOWN && attackHitBoxDown.overlaps(enemy.getHitbox()))) {
+            if ((attackDirection == Enums.Direction.LEFT && attackHitBoxLeft.overlaps(enemy.getHitBox())) ||
+                    (attackDirection == Enums.Direction.RIGHT && attackHitBoxRight.overlaps(enemy.getHitBox())) ||
+                    (attackDirection == Enums.Direction.UP && attackHitBoxUp.overlaps(enemy.getHitBox())) ||
+                    (attackDirection == Enums.Direction.DOWN && attackHitBoxDown.overlaps(enemy.getHitBox()))) {
                 doDamage(enemy);
             }
         }
@@ -402,11 +456,36 @@ public class Player {
             batch.draw(currentFrame, hitbox.getX(), hitbox.getY(), playerBodyTextureWidth, playerBodyTextureHeight);
         }
 
+        drawPlayerHealthBar(batch, camera);
+
         batch.end();
+
         if (Constants.DRAW_HIT_BOXES) {
             drawHitboxes();
         }
+
         batch.begin();
+    }
+
+    private void drawPlayerHealthBar(SpriteBatch batch, OrthographicCamera camera) {
+        float barWidth = 200f;
+        float barHeight = 20f;
+        float x = camera.position.x - camera.viewportWidth / 2 + 20f;
+        float y = camera.position.y + camera.viewportHeight / 2 - barHeight - 20f;
+
+        float healthPercentage = playerHealth / maxPlayerHealth;
+        float previousHealthPercentage = previousHealth / maxPlayerHealth;
+
+        // Draw background damage bar health bar
+        batch.draw(AssetManager.healthBarBackground, x, y, barWidth, barHeight);
+
+        if (displayDamageTime > 0) {
+            float damageWidth = barWidth * (previousHealthPercentage - healthPercentage);
+            batch.draw(AssetManager.healthBarDamage, x + barWidth * healthPercentage, y, damageWidth, barHeight);
+            displayDamageTime -= Gdx.graphics.getDeltaTime();
+        }
+        batch.draw(AssetManager.healthBarForeground, x, y, barWidth * healthPercentage, barHeight);
+
     }
 
     private void drawHitboxes() {
