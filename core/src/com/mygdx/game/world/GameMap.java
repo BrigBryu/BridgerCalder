@@ -426,13 +426,27 @@ public class GameMap {
         return tileMap;
     }
 
-
+    /**
+     * gets tile
+     * @param x in pixels
+     * @param y in pixels
+     * @return tile at that spot
+     */
     public Tile getTileAt(float x, float y) {
-        if(x < tileMap.length && x >= 0 && y < tileMap[0].length && y >=0) {
-            return tileMap[((int)x)][((int)y)];
+        int tileX = (int) (x / Constants.TILE_SIZE);
+        int tileY = (int) (y / Constants.TILE_SIZE);
+
+        if (tileX < tileMap.length && tileX >= 0 && tileY < tileMap[0].length && tileY >= 0) {
+            Tile tile = tileMap[tileY][tileX];
+            if (tile == null) {
+                System.out.println("Warning: Tile at (" + tileX + ", " + tileY + ") is null.");
+            }
+            return tile;
         } else {
+            System.out.println("Warning: Tile coordinates out of bounds (" + tileX + ", " + tileY + ")");
             return null;
         }
     }
+
 
 }

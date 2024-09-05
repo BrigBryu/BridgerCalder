@@ -23,6 +23,7 @@ public class BasicEnemy extends Enemy {
     private Animation<TextureRegion> attackLeftAnimation;
     private Animation<TextureRegion> attackRightAnimation;
 
+
     private Animation<TextureRegion> currentAnimation;
     private float speed;
     private float minX, maxX, minY, maxY; // Boundaries for square movement
@@ -104,28 +105,28 @@ public class BasicEnemy extends Enemy {
     }
 
 
-
+    @Override
     public void move(float delta, Player player) {
-        System.out.println("Cords of this guy (" + hitbox.getX() + ", " + hitbox.getY() + ")");
-        if(map.getTileAt(hitbox.getX(), hitbox.getY()) != null) {
-            if (currentPath == null || currentPathIndex >= currentPath.size()) {
-                // No path or path completed, generate a new path
-                Tile startTile = map.getTileAt(hitbox.getX() / Constants.TILE_SIZE, hitbox.getY() / Constants.TILE_SIZE);
-                Tile goalTile = map.getTileAt(player.getHitbox().getX(), player.getHitbox().getY());
+        System.out.println("Enemy move method called");
+        System.out.println("Current Path: " + currentPath);
 
-                currentPath = aStarPathfinding(startTile, goalTile, map.getTileMap());
-                currentPathIndex = 0;
-            }
+        if (currentPath == null || currentPathIndex >= currentPath.size()) {
+            // No path or path completed, generate a new path
+            Tile startTile = map.getTileAt(hitbox.getX() / Constants.TILE_SIZE, hitbox.getY() / Constants.TILE_SIZE);
+            Tile goalTile = map.getTileAt(player.getHitbox().getX() / Constants.TILE_SIZE, player.getHitbox().getY() / Constants.TILE_SIZE);
 
-            followPath(delta); // Follow the generated path
+            System.out.println("Start Tile: " + startTile + ", Goal Tile: " + goalTile);
+
+            currentPath = aStarPathfinding(startTile, goalTile, map.getTileMap());
+            currentPathIndex = 0;
+            System.out.println("New Path Generated: " + currentPath);
         }
-    }
 
+        followPath(delta); // Follow the generated path
+    }
     @Override
     public void update(float delta, Player player) {
-        stateTime += delta;
-        move(delta, player);
-
+        super.update(delta,player);
     }
 
 
@@ -136,6 +137,7 @@ public class BasicEnemy extends Enemy {
      */
     private void followPath(float delta) {
         if (currentPathIndex >= currentPath.size()) {
+            System.out.println("Path completed");
             currentPath = null; // Path complete
             return;
         }
@@ -162,6 +164,10 @@ public class BasicEnemy extends Enemy {
         float moveX = directionX * speed * delta;
         float moveY = directionY * speed * delta;
 
+        // Debugging the movement
+        System.out.println("Moving towards: (" + targetX + ", " + targetY + ")");
+        System.out.println("Moving from: (" + currentX + ", " + currentY + ") by (" + moveX + ", " + moveY + ")");
+
         // Update the enemy's position
         hitbox.setPosition(currentX + moveX, currentY + moveY);
 
@@ -170,9 +176,10 @@ public class BasicEnemy extends Enemy {
             currentPathIndex++;
         }
 
-        // Set the appropriate animation based on the direction
+        // Set the animation based on direction
         setAnimationDirection(directionX, directionY);
     }
+
 
     /**
      * Sets the current path for the enemy to follow.

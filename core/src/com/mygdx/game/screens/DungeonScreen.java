@@ -80,6 +80,7 @@ public class DungeonScreen implements Screen {
     }
 
     private void update(float delta) {
+        System.out.println("Update method is being called");
         checkUserInput(delta);
         updatePlayer(delta);
         updateEnemies(delta);
@@ -127,7 +128,9 @@ public class DungeonScreen implements Screen {
     }
 
     private void updateEnemies(float delta) {
+        System.out.println("Updating enemies");
         for (Enemy enemy : enemies) {
+            System.out.println("Updating enemy at position: (" + enemy.getX() + ", " + enemy.getY() + ")");
             enemy.update(delta, player);
         }
     }

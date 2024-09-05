@@ -191,7 +191,10 @@ public abstract class Enemy {
 
     public abstract void move(float delta, Player player);
 
-    public abstract void update(float delta, Player player);
+    public void update(float delta, Player player){
+        move(delta,player);
+        stateTime += delta;
+    }
 
     protected abstract void loadAnimations();
 
