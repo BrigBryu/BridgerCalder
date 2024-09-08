@@ -126,7 +126,7 @@ public class BasicEnemy extends Enemy {
     }
     @Override
     public void update(float delta, Player player) {
-        super.update(delta,player);
+        //super.update(delta,player);
     }
 
 

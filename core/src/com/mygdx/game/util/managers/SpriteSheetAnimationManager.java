@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * old dont use!!!
+ */
 public class SpriteSheetAnimationManager {
     private Map<String, Animation<TextureRegion>> spriteSheetAnimations;
     private Animation<TextureRegion> currentAnimation;

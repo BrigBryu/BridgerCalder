@@ -9,19 +9,35 @@ import java.util.List;
 
 public class AttackManager {
 
-    public void triggerAttack(Entity attacker, HitBox attackHitBox, List<Entity> enemies) {
-        for (Entity enemy : enemies) {
+    /**
+     *
+     * @param attackHitBox hit box to check for collisions with enemies
+     * @param enemies to check for collisions with attack
+     */
+    public void triggerAttackOnEnemies(HitBox attackHitBox, List<Enemy> enemies) {
+        for (Enemy enemy : enemies) {
             if (attackHitBox.overlaps(enemy.getHitBox())) {
-                applyDamage(attacker, enemy);
+                applyDamage(10, enemy);
             }
         }
     }
 
+    public void triggerAttackOnPlayer(Entity player, List<Entity> enemies) {
+        for (Entity enemy : enemies) {
+            if (enemy.isAttacking() && player.getHitBox().overlaps(enemy.getAttackHitBox())) {
+                applyDamage(10, player);
+            }
+        }
+    }
     public boolean checkHit(Entity attacker, Entity target) {
         return attacker.getHitBox().overlaps(target.getHitBox());
     }
 
-    private void applyDamage(Entity attacker, Entity enemy) {
-        enemy.getHealthManager().takeDamage(10); // Example damage value
+    private void applyDamage(float damage, Enemy enemy) {
+        enemy.takeDamage(damage); // Example damage value
+    }
+
+    private void applyDamage(float damage, Entity enemy) {
+        enemy.getHealthManager().takeDamage(damage); // Example damage value
     }
 }
